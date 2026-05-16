@@ -1,0 +1,14 @@
+{% macro modal(id, title) %}
+<div x-data="{ open: false }" class="inline">
+    {{ caller("trigger") }}
+    <div x-show="open" x-transition.opacity class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4">
+        <div class="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-soft dark:bg-slate-900" x-on:click.outside="open = false">
+            <div class="mb-5 flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-slate-950 dark:text-white">{{ title }}</h2>
+                <button type="button" class="rounded-xl p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800" x-on:click="open = false">Close</button>
+            </div>
+            {{ caller("body") }}
+        </div>
+    </div>
+</div>
+{% endmacro %}

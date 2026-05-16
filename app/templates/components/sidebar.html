@@ -1,0 +1,78 @@
+{% set nav_items = [
+    {"label": "Dashboard", "endpoint": "analytics.analytics_dashboard", "roles": ["Admin", "Analyst"], "icon": "fa-solid fa-chart-line"},
+    {"label": "Registry", "endpoint": "registry.index", "roles": ["Admin", "Encoder"], "icon": "fa-solid fa-pen-to-square"},
+    {"label": "Reports", "endpoint": "reports.index", "roles": ["Admin", "Analyst"], "icon": "fa-solid fa-file-lines"},
+    {"label": "User Management", "endpoint": "admin.users", "roles": ["Admin"], "icon": "fa-solid fa-user-gear"}
+] %}
+<div class="fixed inset-0 z-40 bg-slate-950/40 lg:hidden" x-show="sidebarOpen" x-transition.opacity x-on:click="sidebarOpen = false"></div>
+<button type="button" class="fixed left-4 top-4 z-30 rounded-xl bg-white/90 p-2 text-slate-700 shadow-soft backdrop-blur hover:bg-white dark:bg-slate-900/90 dark:text-slate-200 lg:hidden" x-on:click="sidebarOpen = true" aria-label="Open sidebar">
+    <span class="block h-0.5 w-5 bg-current"></span>
+    <span class="mt-1.5 block h-0.5 w-5 bg-current"></span>
+    <span class="mt-1.5 block h-0.5 w-5 bg-current"></span>
+</button>
+<aside class="fixed inset-y-0 left-0 z-50 flex w-72 flex-col overflow-hidden border-r border-slate-200 bg-white shadow-soft transition-all duration-300 dark:border-slate-800 dark:bg-slate-950"
+       x-bind:class="{ '-translate-x-full lg:translate-x-0': !sidebarOpen, 'translate-x-0': sidebarOpen, 'lg:w-24': sidebarCollapsed }">
+    <div class="relative border-b border-slate-100 bg-white dark:border-slate-800 dark:bg-slate-950">
+        <a href="{{ url_for('index') }}" class="flex h-32 w-full items-center justify-center overflow-hidden" x-show="!sidebarCollapsed" x-transition>
+            <img class="h-full w-full object-cover object-left-top" src="{{ url_for('static', filename='img/lifeline-sentinel-sidebar-logo.png') }}" alt="Lifeline Sentinel logo">
+        </a>
+        <a href="{{ url_for('index') }}" class="flex h-20 w-full items-center justify-center" x-show="sidebarCollapsed" x-transition>
+            <img class="h-12 w-12 object-contain" src="{{ url_for('static', filename='img/lifeline-sentinel-sidebar-collapsed-logo.png') }}" alt="Lifeline Sentinel logo">
+        </a>
+        <button type="button" class="absolute right-3 top-3 hidden rounded-xl bg-white/85 p-2 text-slate-500 shadow-sm hover:bg-white dark:bg-slate-900/85 dark:hover:bg-slate-900 lg:block" x-on:click="sidebarCollapsed = !sidebarCollapsed" aria-label="Collapse sidebar">
+            <i class="fa-solid fa-angle-left" x-show="!sidebarCollapsed" aria-hidden="true"></i>
+            <i class="fa-solid fa-angle-right" x-show="sidebarCollapsed" aria-hidden="true"></i>
+        </button>
+    </div>
+
+    <nav class="mt-4 space-y-1 px-4" x-bind:class="{ 'px-3': sidebarCollapsed }">
+        {% for item in nav_items %}
+            {% if current_user.role in item.roles %}
+                {% set active = request.endpoint == item.endpoint %}
+                <a href="{{ url_for(item.endpoint) }}" class="group flex items-center gap-2.5 rounded-2xl px-3 py-2.5 text-sm font-medium transition {{ 'bg-sentinel-50 text-sentinel-700 dark:bg-sentinel-900/40 dark:text-white' if active else 'text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white' }}" x-bind:class="{ 'justify-center px-2': sidebarCollapsed }">
+                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl {{ 'bg-sentinel-600 text-white' if active else 'bg-slate-100 text-slate-500 group-hover:text-slate-900 dark:bg-slate-800 dark:text-slate-300' }}">
+                        <i class="{{ item.icon }} text-sm" aria-hidden="true"></i>
+                    </span>
+                    <span x-show="!sidebarCollapsed" x-transition>{{ item.label }}</span>
+                </a>
+            {% endif %}
+        {% endfor %}
+    </nav>
+
+    <div class="mt-auto p-4" x-bind:class="{ 'px-3': sidebarCollapsed }">
+        <div class="rounded-2xl border border-slate-200 bg-slate-50 shadow-sm dark:border-slate-800 dark:bg-slate-900" x-show="!sidebarCollapsed" x-transition>
+            <button type="button" class="flex w-full items-center justify-between gap-3 px-3 py-3 text-left" x-on:click="sidebarAccountOpen = !sidebarAccountOpen">
+                <span class="min-w-0">
+                    <span class="block truncate text-sm font-semibold text-slate-950 dark:text-white">{{ current_user.full_name }}</span>
+                    <span class="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">{{ current_user.role }}</span>
+                </span>
+                <i class="fa-solid fa-chevron-up shrink-0 text-xs text-slate-500 transition" x-bind:class="{ 'rotate-180': sidebarAccountOpen }" aria-hidden="true"></i>
+            </button>
+            <div class="border-t border-slate-200 p-3 dark:border-slate-800" x-show="sidebarAccountOpen" x-transition>
+                <div class="grid grid-cols-2 gap-2">
+                    <button type="button" class="flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-white dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800" x-on:click="darkMode = !darkMode; localStorage.setItem('darkMode', darkMode)">
+                        <i class="fa-solid fa-moon" x-show="!darkMode" aria-hidden="true"></i>
+                        <i class="fa-solid fa-sun" x-show="darkMode" aria-hidden="true"></i>
+                        <span>Theme</span>
+                    </button>
+                    <a class="flex items-center justify-center gap-2 rounded-xl bg-sentinel-600 px-3 py-2 text-center text-xs font-semibold text-white hover:bg-sentinel-700" href="{{ url_for('auth.logout') }}">
+                        <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-2 shadow-sm dark:border-slate-800 dark:bg-slate-900" x-show="sidebarCollapsed" x-transition>
+            <button type="button" class="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-sentinel-600 text-sm font-bold text-white" x-on:click="sidebarAccountOpen = !sidebarAccountOpen" aria-label="Show account actions">{{ current_user.full_name[:1] }}</button>
+            <div class="mt-2 space-y-2" x-show="sidebarAccountOpen" x-transition>
+                <button type="button" class="mx-auto flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-white dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800" x-on:click="darkMode = !darkMode; localStorage.setItem('darkMode', darkMode)" aria-label="Toggle theme">
+                    <i class="fa-solid fa-moon" x-show="!darkMode" aria-hidden="true"></i>
+                    <i class="fa-solid fa-sun" x-show="darkMode" aria-hidden="true"></i>
+                </button>
+                <a class="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-sentinel-600 text-sm font-semibold text-white hover:bg-sentinel-700" href="{{ url_for('auth.logout') }}" aria-label="Logout">
+                    <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</aside>

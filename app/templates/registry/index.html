@@ -1,0 +1,36 @@
+{% extends "layouts/base.html" %}
+{% import "components/cards.html" as cards %}
+{% block page_title %}Registry Module{% endblock %}
+{% block content %}
+<div class="space-y-6">
+    <div>
+        <p class="text-sm font-semibold uppercase tracking-wide text-sentinel-600 dark:text-sentinel-100">Registry</p>
+        <h2 class="mt-1 text-2xl font-bold tracking-tight text-slate-950 dark:text-white">SSASH Registry Workspace</h2>
+        <p class="mt-2 max-w-3xl text-sm text-slate-500 dark:text-slate-400">Structured registry management prepared for case intake, validation, and surveillance workflows.</p>
+    </div>
+    <div class="grid gap-4 md:grid-cols-3">
+        {{ cards.metric_card("Open records", "0", "Cases requiring action") }}
+        {{ cards.metric_card("Validated today", "0", "Ready for reporting") }}
+        {{ cards.metric_card("Data quality flags", "0", "No checks running") }}
+    </div>
+    {% call cards.panel("Registry Queue", "Case table component ready for SSASH form integration") %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800">
+                <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-950 dark:text-slate-400">
+                    <tr>
+                        <th class="px-4 py-3">Case ID</th>
+                        <th class="px-4 py-3">Status</th>
+                        <th class="px-4 py-3">Assigned Role</th>
+                        <th class="px-4 py-3">Updated</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="4" class="px-4 py-8 text-center text-slate-500 dark:text-slate-400">Registry records will appear here once intake forms are connected.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    {% endcall %}
+</div>
+{% endblock %}

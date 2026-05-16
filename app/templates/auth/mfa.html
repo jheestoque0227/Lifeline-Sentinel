@@ -1,0 +1,29 @@
+{% extends "layouts/base.html" %}
+{% block content %}
+<div class="relative mx-[-1rem] my-[-2rem] flex min-h-screen items-center justify-center overflow-hidden bg-cover bg-center px-4 py-10 sm:mx-[-1.5rem] sm:px-6 lg:mx-[-2rem] lg:px-8" style="background-image: url('{{ url_for('static', filename='img/login-background.png') }}');">
+    <div class="absolute inset-0 bg-accent/50"></div>
+    <div class="absolute inset-0 bg-white/30 backdrop-blur-[1px] dark:bg-slate-950/45"></div>
+    <div class="relative z-10 w-full max-w-md">
+        <section class="rounded-2xl border border-white/70 bg-white/90 p-6 shadow-soft backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/90 sm:p-8">
+            <div class="mb-8 text-center">
+                <img class="mx-auto h-28 w-auto" src="{{ url_for('static', filename='img/lifeline-sentinel-login-logo.png') }}" alt="Lifeline Sentinel logo">
+                <h2 class="mt-6 text-2xl font-bold text-slate-950 dark:text-white">Email verification</h2>
+                <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Enter the {{ expires_minutes }}-minute code sent to {{ email }}.</p>
+            </div>
+            <form method="post" action="{{ url_for('auth.mfa_verify') }}" class="space-y-5">
+                <div>
+                    <label class="text-sm font-medium text-slate-700 dark:text-slate-200" for="code">Verification code</label>
+                    <input class="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-center text-lg font-semibold tracking-[0.35em] outline-none transition focus:border-sentinel-600 focus:ring-4 focus:ring-sentinel-100 dark:border-slate-700 dark:bg-slate-950 dark:focus:ring-sentinel-900" id="code" name="code" type="text" inputmode="numeric" maxlength="6" autocomplete="one-time-code" required autofocus>
+                </div>
+                <button class="w-full rounded-2xl bg-sentinel-600 px-4 py-3 text-sm font-semibold text-white shadow-soft transition hover:bg-sentinel-700" type="submit">Verify and continue</button>
+            </form>
+            <div class="mt-4 grid grid-cols-2 gap-3">
+                <form method="post" action="{{ url_for('auth.mfa_resend') }}">
+                    <button class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800" type="submit">Resend code</button>
+                </form>
+                <a class="rounded-2xl border border-slate-200 px-4 py-3 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800" href="{{ url_for('auth.login') }}">Cancel</a>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

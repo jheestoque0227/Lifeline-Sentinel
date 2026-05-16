@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en" x-data="{ sidebarOpen: false, sidebarCollapsed: false, sidebarAccountOpen: true, darkMode: localStorage.getItem('darkMode') === 'true' }" x-bind:class="{ 'dark': darkMode }">
+<head>
+    <meta charset="utf-8">
+    <title>{% block title %}Lifeline Sentinel{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="{{ url_for('static', filename='css/app.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='vendor/fontawesome/all.min.css') }}" rel="stylesheet">
+    <script defer src="{{ url_for('static', filename='vendor/alpine.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='vendor/chart.umd.js') }}"></script>
+</head>
+<body class="bg-appBg text-slate-900 antialiased transition-colors dark:bg-slate-950 dark:text-slate-100">
+    <div class="min-h-screen {% if current_user.is_authenticated %}system-scale{% endif %}">
+        {% if current_user.is_authenticated %}
+            {% include "components/sidebar.html" %}
+            <div class="min-h-screen transition-all duration-300 lg:pl-72" x-bind:class="{ 'lg:pl-24': sidebarCollapsed }">
+                <main class="px-4 py-6 sm:px-6 lg:px-8">
+        {% else %}
+            <main class="min-h-screen px-4 py-8 sm:px-6 lg:px-8">
+        {% endif %}
+                {% include "components/flash.html" %}
+                {% block content %}{% endblock %}
+            </main>
+        {% if current_user.is_authenticated %}
+            </div>
+        {% endif %}
+    </div>
+    <script src="{{ url_for('static', filename='vendor/flowbite.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+{% extends "layouts/base.html" %}
+{% import "components/cards.html" as cards %}
+{% block page_title %}Registry Statistics{% endblock %}
+{% block content %}
+<div class="space-y-6">
+    <div>
+        <p class="text-sm font-semibold uppercase tracking-wide text-sentinel-600 dark:text-sentinel-100">Registry Statistics</p>
+        <h2 class="mt-1 text-2xl font-bold tracking-tight text-slate-950 dark:text-white">Registry Operations Snapshot</h2>
+        <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Accessible to Admin, Encoder, and Analyst according to the fixed role matrix.</p>
+    </div>
+    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {{ cards.metric_card("Draft records", "0", "Encoder workspace") }}
+        {{ cards.metric_card("Validated records", "0", "Ready for analytics") }}
+        {{ cards.metric_card("Data completeness", "0%", "Dictionary checks pending") }}
+        {{ cards.metric_card("Recent updates", "0", "Last 7 days") }}
+    </div>
+    {% call cards.panel("Registry Completeness", "Prepared Chart.js surface for SSASH data dictionary metrics") %}
+        <div class="h-80">
+            <canvas data-chart="registryCompleteness"></canvas>
+        </div>
+    {% endcall %}
+</div>
+{% endblock %}

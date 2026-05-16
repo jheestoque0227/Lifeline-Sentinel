@@ -1,0 +1,35 @@
+{% extends "layouts/base.html" %}
+{% block content %}
+<div class="relative mx-[-1rem] my-[-2rem] flex min-h-screen items-center justify-center overflow-hidden bg-cover bg-center px-4 py-10 sm:mx-[-1.5rem] sm:px-6 lg:mx-[-2rem] lg:px-8" style="background-image: url('{{ url_for('static', filename='img/login-background.png') }}');">
+    <div class="absolute inset-0 bg-accent/50"></div>
+    <div class="absolute inset-0 bg-white/30 backdrop-blur-[1px] dark:bg-slate-950/45"></div>
+    <div class="relative z-10 grid w-full max-w-6xl gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+        <section class="hidden lg:block">
+            <p class="text-sm font-semibold uppercase tracking-wide text-sentinel-900">Lifeline Sentinel</p>
+            <h1 class="mt-4 max-w-xl text-5xl font-bold tracking-tight text-sentinel-900">Lifeline Sentinel</h1>
+            <p class="mt-4 max-w-lg text-base font-medium leading-7 text-slate-800">A secure surveillance registry system for monitoring and managing suicide attempts and self-harm cases.</p>
+        </section>
+        <section class="mx-auto w-[90%] rounded-2xl border border-white/70 bg-white/90 p-6 shadow-soft backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/90 sm:p-8">
+            <div class="mb-8 text-center">
+                <img class="mx-auto h-32 w-auto sm:h-40" src="{{ url_for('static', filename='img/lifeline-sentinel-login-logo.png') }}" alt="Lifeline Sentinel logo">
+                <h2 class="mt-6 text-2xl font-bold text-slate-950 dark:text-white">Sign in</h2>
+                <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Please sign in using your valid account credentials.</p>
+            </div>
+            <form method="post" action="{{ url_for('auth.login') }}" class="space-y-5">
+                <div>
+                    <label class="text-sm font-medium text-slate-700 dark:text-slate-200" for="username">Username</label>
+                    <input class="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-sentinel-600 focus:ring-4 focus:ring-sentinel-100 dark:border-slate-700 dark:bg-slate-950 dark:focus:ring-sentinel-900" id="username" name="username" type="text" value="{{ username or '' }}" required autofocus>
+                </div>
+                <div>
+                    <label class="text-sm font-medium text-slate-700 dark:text-slate-200" for="password">Password</label>
+                    <input class="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-sentinel-600 focus:ring-4 focus:ring-sentinel-100 dark:border-slate-700 dark:bg-slate-950 dark:focus:ring-sentinel-900" id="password" name="password" type="password" required>
+                </div>
+                <div class="flex items-center justify-end">
+                    <a class="text-sm font-semibold text-sentinel-600 hover:text-sentinel-700 dark:text-sentinel-100" href="{{ url_for('auth.forgot_password') }}">Forgot password?</a>
+                </div>
+                <button class="w-full rounded-2xl bg-sentinel-600 px-4 py-3 text-sm font-semibold text-white shadow-soft transition hover:bg-sentinel-700" type="submit">Login</button>
+            </form>
+        </section>
+    </div>
+</div>
+{% endblock %}

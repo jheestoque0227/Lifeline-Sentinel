@@ -1,0 +1,26 @@
+<header class="sticky top-0 z-30 border-b border-slate-200/80 bg-white/85 backdrop-blur dark:border-slate-800 dark:bg-slate-950/85">
+    <div class="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center gap-3">
+            <button type="button" class="rounded-xl p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 lg:hidden" x-on:click="sidebarOpen = true" aria-label="Open sidebar">
+                <span class="block h-0.5 w-5 bg-current"></span>
+                <span class="mt-1.5 block h-0.5 w-5 bg-current"></span>
+                <span class="mt-1.5 block h-0.5 w-5 bg-current"></span>
+            </button>
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-wide text-sentinel-600 dark:text-sentinel-100">Operational Prototype</p>
+                <h1 class="text-base font-semibold text-slate-950 dark:text-white">{% block page_title %}Lifeline Sentinel{% endblock %}</h1>
+            </div>
+        </div>
+        <div class="flex items-center gap-2 sm:gap-4">
+            <button type="button" class="rounded-xl border border-slate-200 p-2 text-slate-600 hover:bg-slate-100 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-800" x-on:click="darkMode = !darkMode; localStorage.setItem('darkMode', darkMode)" aria-label="Toggle dark mode">
+                <span x-show="!darkMode">☾</span>
+                <span x-show="darkMode">☀</span>
+            </button>
+            <div class="hidden text-right sm:block">
+                <p class="text-sm font-semibold text-slate-900 dark:text-white">{{ current_user.full_name }}</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400">{{ current_user.role }}</p>
+            </div>
+            <a class="rounded-xl bg-sentinel-600 px-4 py-2 text-sm font-semibold text-white shadow-soft transition hover:bg-sentinel-700" href="{{ url_for('auth.logout') }}">Logout</a>
+        </div>
+    </div>
+</header>

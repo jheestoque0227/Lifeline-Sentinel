@@ -1,0 +1,43 @@
+@config "../../../../tailwind.config.js";
+@import "tailwindcss";
+@plugin "flowbite/plugin";
+@source "../../../templates/**/*.html";
+@source "../../../../node_modules/flowbite/**/*.js";
+
+@import "../../../../node_modules/@fontsource/inter/400.css";
+@import "../../../../node_modules/@fontsource/inter/500.css";
+@import "../../../../node_modules/@fontsource/inter/600.css";
+@import "../../../../node_modules/@fontsource/inter/700.css";
+
+@layer base {
+    :root {
+        --chart-label-color: #475569;
+    }
+
+    .dark {
+        --chart-label-color: #cbd5e1;
+    }
+
+    body {
+        font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    }
+
+    [x-cloak] {
+        display: none !important;
+    }
+}
+
+@layer utilities {
+    .system-scale {
+        zoom: 0.9;
+    }
+
+    @supports not (zoom: 1) {
+        .system-scale {
+            width: 111.111%;
+            min-height: 111.111vh;
+            transform: scale(0.9);
+            transform-origin: top left;
+        }
+    }
+}

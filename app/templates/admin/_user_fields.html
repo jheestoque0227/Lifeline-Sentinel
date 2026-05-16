@@ -1,0 +1,24 @@
+<div>
+    <label class="text-sm font-medium text-slate-700 dark:text-slate-200" for="employee_no{{ user.id if user is defined else 'new' }}">Employee No.</label>
+    <input class="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-sentinel-600 focus:ring-4 focus:ring-sentinel-100 dark:border-slate-700 dark:bg-slate-950 dark:focus:ring-sentinel-900" id="employee_no{{ user.id if user is defined else 'new' }}" name="employee_no" type="text" value="{{ user.employee_no if user is defined else '' }}">
+</div>
+<div>
+    <label class="text-sm font-medium text-slate-700 dark:text-slate-200" for="full_name{{ user.id if user is defined else 'new' }}">Full name</label>
+    <input class="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-sentinel-600 focus:ring-4 focus:ring-sentinel-100 dark:border-slate-700 dark:bg-slate-950 dark:focus:ring-sentinel-900" id="full_name{{ user.id if user is defined else 'new' }}" name="full_name" type="text" value="{{ user.full_name if user is defined else '' }}" required>
+</div>
+<div>
+    <label class="text-sm font-medium text-slate-700 dark:text-slate-200" for="username{{ user.id if user is defined else 'new' }}">Username</label>
+    <input class="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-sentinel-600 focus:ring-4 focus:ring-sentinel-100 dark:border-slate-700 dark:bg-slate-950 dark:focus:ring-sentinel-900" id="username{{ user.id if user is defined else 'new' }}" name="username" type="text" value="{{ user.username if user is defined else '' }}" required>
+</div>
+<div>
+    <label class="text-sm font-medium text-slate-700 dark:text-slate-200" for="email{{ user.id if user is defined else 'new' }}">Email</label>
+    <input class="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-sentinel-600 focus:ring-4 focus:ring-sentinel-100 dark:border-slate-700 dark:bg-slate-950 dark:focus:ring-sentinel-900" id="email{{ user.id if user is defined else 'new' }}" name="email" type="text" value="{{ user.email if user is defined else '' }}">
+</div>
+<div>
+    <label class="text-sm font-medium text-slate-700 dark:text-slate-200" for="role{{ user.id if user is defined else 'new' }}">Role</label>
+    <select class="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-sentinel-600 focus:ring-4 focus:ring-sentinel-100 dark:border-slate-700 dark:bg-slate-950 dark:focus:ring-sentinel-900" id="role{{ user.id if user is defined else 'new' }}" name="role" required>
+        {% for role in roles %}
+        <option value="{{ role }}" {% if user is defined and user.role == role %}selected{% endif %}>{{ role }}</option>
+        {% endfor %}
+    </select>
+</div>
