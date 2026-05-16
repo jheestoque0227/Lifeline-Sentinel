@@ -1,4 +1,109 @@
+window.initRegistrySelect2 = function initRegistrySelect2(root) {
+    if (window.jQuery && window.jQuery.fn && window.jQuery.fn.select2) {
+        const scope = root || document;
+        window.jQuery(scope).find("select.js-registry-select, select.js-example-basic-multiple").addBack("select.js-registry-select, select.js-example-basic-multiple").each(function () {
+            const $field = window.jQuery(this);
+            if ($field.hasClass("select2-hidden-accessible")) {
+                $field.select2("destroy");
+            }
+            const $dropdownParent = $field.parent();
+            $dropdownParent.addClass("select2-field-parent");
+
+            $field.select2({
+                width: "100%",
+                dropdownAutoWidth: false,
+                dropdownParent: $dropdownParent,
+                placeholder: $field.data("placeholder") || "Select options",
+                closeOnSelect: !$field.prop("multiple"),
+                allowClear: true
+            });
+        });
+    }
+};
+
+window.initConditionalOtherFields = function initConditionalOtherFields(root) {
+    const scope = root || document;
+    scope.querySelectorAll("[data-other-trigger]").forEach((trigger) => {
+        const targetId = trigger.dataset.otherTrigger;
+        const target = scope.querySelector(`#${CSS.escape(targetId)}`) || document.getElementById(targetId);
+        if (!target) return;
+
+        const sync = () => {
+            const isOther = (trigger.value || "").trim().toLowerCase() === "other";
+            target.disabled = !isOther;
+            target.required = isOther;
+            document.querySelectorAll(`[data-required-marker-for="${target.id}"]`).forEach((marker) => {
+                marker.classList.toggle("hidden", !isOther);
+            });
+            if (!isOther) {
+                target.value = "";
+            }
+        };
+
+        trigger.removeEventListener("change", trigger._conditionalOtherSync);
+        trigger._conditionalOtherSync = sync;
+        trigger.addEventListener("change", sync);
+        sync();
+    });
+};
+
+window.initSubstanceTypeFields = function initSubstanceTypeFields(root) {
+    const scope = root || document;
+    scope.querySelectorAll("[data-substance-trigger]").forEach((trigger) => {
+        const targetId = trigger.dataset.substanceTrigger;
+        const target = scope.querySelector(`#${CSS.escape(targetId)}`) || document.getElementById(targetId);
+        if (!target) return;
+
+        const sync = () => {
+            target.disabled = !trigger.checked;
+            target.required = trigger.checked;
+            document.querySelectorAll(`[data-required-marker-for="${target.id}"]`).forEach((marker) => {
+                marker.classList.toggle("hidden", !trigger.checked);
+            });
+            if (!trigger.checked) {
+                target.value = "";
+            }
+        };
+
+        trigger.removeEventListener("change", trigger._substanceTypeSync);
+        trigger._substanceTypeSync = sync;
+        trigger.addEventListener("change", sync);
+        sync();
+    });
+};
+
+window.initDataTables = function initDataTables(root) {
+    if (!window.jQuery || !window.jQuery.fn || !window.jQuery.fn.DataTable) return;
+    const scope = root || document;
+    window.jQuery(scope).find("table.js-data-table").addBack("table.js-data-table").each(function () {
+        const $table = window.jQuery(this);
+        if (window.jQuery.fn.DataTable.isDataTable(this)) return;
+        $table.DataTable({
+            autoWidth: false,
+            pageLength: 10,
+            lengthMenu: [10, 25, 50, 100],
+            order: [],
+            responsive: false,
+            language: {
+                search: "",
+                searchPlaceholder: "Search table...",
+                lengthMenu: "Show _MENU_ entries",
+                info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                emptyTable: "No records found"
+            },
+            columnDefs: [
+                { orderable: false, targets: "no-sort" }
+            ]
+        });
+    });
+};
+
 document.addEventListener("DOMContentLoaded", () => {
+    window.initRegistrySelect2(document);
+    window.initConditionalOtherFields(document);
+    window.initSubstanceTypeFields(document);
+    window.initDataTables(document);
+
     const charts = {
         caseTrend: {
             type: "line",

@@ -1,6 +1,7 @@
 {% set nav_items = [
     {"label": "Dashboard", "endpoint": "analytics.analytics_dashboard", "roles": ["Admin", "Analyst"], "icon": "fa-solid fa-chart-line"},
     {"label": "Registry", "endpoint": "registry.index", "roles": ["Admin", "Encoder"], "icon": "fa-solid fa-pen-to-square"},
+    {"label": "Registry Stats", "endpoint": "registry.statistics", "roles": ["Admin", "Encoder", "Analyst"], "icon": "fa-solid fa-chart-pie"},
     {"label": "Reports", "endpoint": "reports.index", "roles": ["Admin", "Analyst"], "icon": "fa-solid fa-file-lines"},
     {"label": "User Management", "endpoint": "admin.users", "roles": ["Admin"], "icon": "fa-solid fa-user-gear"}
 ] %}
@@ -55,10 +56,10 @@
                         <i class="fa-solid fa-sun" x-show="darkMode" aria-hidden="true"></i>
                         <span>Theme</span>
                     </button>
-                    <a class="flex items-center justify-center gap-2 rounded-xl bg-sentinel-600 px-3 py-2 text-center text-xs font-semibold text-white hover:bg-sentinel-700" href="{{ url_for('auth.logout') }}">
+                    <button type="button" class="flex items-center justify-center gap-2 rounded-xl bg-sentinel-600 px-3 py-2 text-center text-xs font-semibold text-white hover:bg-sentinel-700" x-on:click="logoutConfirm = true">
                         <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
                         <span>Logout</span>
-                    </a>
+                    </button>
                 </div>
             </div>
         </div>
@@ -69,10 +70,35 @@
                     <i class="fa-solid fa-moon" x-show="!darkMode" aria-hidden="true"></i>
                     <i class="fa-solid fa-sun" x-show="darkMode" aria-hidden="true"></i>
                 </button>
-                <a class="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-sentinel-600 text-sm font-semibold text-white hover:bg-sentinel-700" href="{{ url_for('auth.logout') }}" aria-label="Logout">
+                <button type="button" class="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-sentinel-600 text-sm font-semibold text-white hover:bg-sentinel-700" x-on:click="logoutConfirm = true" aria-label="Logout">
                     <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
-                </a>
+                </button>
             </div>
         </div>
     </div>
 </aside>
+
+<div class="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/50 px-4 backdrop-blur-sm"
+     x-show="logoutConfirm"
+     x-transition.opacity
+     x-cloak
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="logout-confirm-title">
+    <div class="w-full max-w-sm rounded-2xl border border-white/70 bg-white p-6 shadow-soft dark:border-slate-800 dark:bg-slate-900"
+         x-show="logoutConfirm"
+         x-transition
+         x-on:click.outside="logoutConfirm = false">
+        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-sentinel-50 text-sentinel-700 dark:bg-sentinel-900/40 dark:text-sentinel-100">
+            <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
+        </div>
+        <div class="mt-4 text-center">
+            <h2 id="logout-confirm-title" class="text-lg font-bold text-slate-950 dark:text-white">Are you sure you want to logout?</h2>
+            <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Your current session will be ended.</p>
+        </div>
+        <div class="mt-6 grid grid-cols-2 gap-3">
+            <button type="button" class="rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800" x-on:click="logoutConfirm = false">Cancel</button>
+            <a class="rounded-2xl bg-sentinel-600 px-4 py-3 text-center text-sm font-semibold text-white shadow-soft transition hover:bg-sentinel-700" href="{{ url_for('auth.logout') }}">Logout</a>
+        </div>
+    </div>
+</div>

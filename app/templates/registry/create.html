@@ -1,0 +1,135 @@
+{% extends "layouts/base.html" %}
+{% block title %}New Registry Entry{% endblock %}
+{% block content %}
+{% set accepted_initial = form.intent.data == "Intentional" and form.infliction.data == "Self-inflicted" %}
+<div class="space-y-6"
+     x-data="{
+        modalOpen: {{ 'false' if accepted_initial else 'true' }},
+        rejectedOpen: false,
+        intent: '{{ form.intent.data if form.intent.data else '' }}',
+        infliction: '{{ form.infliction.data if form.infliction.data else '' }}',
+        accepted: {{ 'true' if accepted_initial else 'false' }},
+        rejectionMessage: '',
+        checkEligibility() {
+            if (!this.intent || !this.infliction) {
+                return;
+            }
+            if (this.intent === 'Accidental') {
+                this.rejectionMessage = 'This case is not subject for registry because the intent is accidental.';
+                this.modalOpen = false;
+                this.rejectedOpen = true;
+                return;
+            }
+            if (this.infliction === 'Inflicted by another') {
+                this.rejectionMessage = 'This case is not subject for registry because the injury was inflicted by another person.';
+                this.modalOpen = false;
+                this.rejectedOpen = true;
+                return;
+            }
+            this.accepted = true;
+            this.modalOpen = false;
+        }
+     }">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+            <p class="text-sm font-semibold uppercase tracking-wide text-sentinel-600 dark:text-sentinel-100">Registry</p>
+            <h1 class="mt-1 text-2xl font-bold tracking-tight text-slate-950 dark:text-white">Add New Registry Entry</h1>
+        </div>
+        <a href="{{ url_for('registry.index') }}" class="btn btn-secondary">Back to list</a>
+    </div>
+
+    <section class="rounded-lg border border-sentinel-100 bg-sentinel-50 p-5 text-sm text-slate-700 dark:border-sentinel-900 dark:bg-sentinel-900/20 dark:text-slate-200" x-show="!accepted">
+        Complete case ascertainment first to determine whether the report qualifies as a suicide/self-harm registry case.
+    </section>
+
+    <div class="fixed inset-0 z-[80] flex items-center justify-center bg-slate-950/50 px-4 backdrop-blur-sm"
+         x-show="modalOpen"
+         x-transition.opacity
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="case-ascertainment-title">
+        <div class="w-full max-w-lg rounded-lg border border-white/70 bg-white p-6 shadow-soft dark:border-slate-800 dark:bg-slate-900"
+             x-show="modalOpen"
+             x-transition>
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <p class="text-sm font-semibold uppercase tracking-wide text-sentinel-600 dark:text-sentinel-100">Case Ascertainment</p>
+                    <h2 id="case-ascertainment-title" class="mt-1 text-xl font-bold text-slate-950 dark:text-white">Registry eligibility</h2>
+                </div>
+                <a href="{{ url_for('registry.index') }}" class="btn-icon" aria-label="Close">
+                    <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                </a>
+            </div>
+
+            <div class="mt-6">
+                <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">1. What is the intent?</p>
+                <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                    <button type="button" class="case-choice"
+                            x-bind:class="intent === 'Intentional' ? 'border-sentinel-500 bg-sentinel-50 text-sentinel-800 dark:border-sentinel-700 dark:bg-sentinel-900/40 dark:text-sentinel-100' : 'border-slate-200 text-slate-700 dark:border-slate-700 dark:text-slate-200'"
+                            x-on:click="intent = 'Intentional'">
+                        Intentional
+                    </button>
+                    <button type="button" class="case-choice"
+                            x-bind:class="intent === 'Accidental' ? 'border-red-400 bg-red-50 text-red-800 dark:border-red-900 dark:bg-red-950/30 dark:text-red-100' : 'border-slate-200 text-slate-700 dark:border-slate-700 dark:text-slate-200'"
+                            x-on:click="intent = 'Accidental'">
+                        Accidental
+                    </button>
+                </div>
+            </div>
+
+            <div class="mt-6">
+                <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">2. Who inflicted the injury?</p>
+                <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                    <button type="button" class="case-choice"
+                            x-bind:class="infliction === 'Self-inflicted' ? 'border-sentinel-500 bg-sentinel-50 text-sentinel-800 dark:border-sentinel-700 dark:bg-sentinel-900/40 dark:text-sentinel-100' : 'border-slate-200 text-slate-700 dark:border-slate-700 dark:text-slate-200'"
+                            x-on:click="infliction = 'Self-inflicted'">
+                        Self-inflicted
+                    </button>
+                    <button type="button" class="case-choice"
+                            x-bind:class="infliction === 'Inflicted by another' ? 'border-red-400 bg-red-50 text-red-800 dark:border-red-900 dark:bg-red-950/30 dark:text-red-100' : 'border-slate-200 text-slate-700 dark:border-slate-700 dark:text-slate-200'"
+                            x-on:click="infliction = 'Inflicted by another'">
+                        Inflicted by another
+                    </button>
+                </div>
+            </div>
+
+            <div class="mt-6 flex items-center justify-end gap-3">
+                <a href="{{ url_for('registry.index') }}" class="btn btn-secondary">Cancel</a>
+                <button type="button" class="btn btn-primary"
+                        x-bind:disabled="!intent || !infliction"
+                        x-on:click="checkEligibility(); if (accepted) { $nextTick(() => { window.initRegistrySelect2($root); window.initConditionalOtherFields($root); window.initSubstanceTypeFields($root); window.bindRegistryConditionalOtherFields($root); window.setTimeout(() => window.initRegistrySelect2($root), 0); }) }">
+                    Continue
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed inset-0 z-[90] flex items-center justify-center bg-slate-950/50 px-4 backdrop-blur-sm"
+         x-show="rejectedOpen"
+         x-transition.opacity
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="not-registry-title">
+        <div class="w-full max-w-md rounded-lg border border-white/70 bg-white p-6 text-center shadow-soft dark:border-slate-800 dark:bg-slate-900"
+             x-show="rejectedOpen"
+             x-transition>
+            <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-100">
+                <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+            </div>
+            <h2 id="not-registry-title" class="mt-4 text-lg font-bold text-slate-950 dark:text-white">Not subject for registry</h2>
+            <p class="mt-2 text-sm text-slate-500 dark:text-slate-400" x-text="rejectionMessage"></p>
+            <div class="mt-6 grid gap-3 sm:grid-cols-2">
+                <button type="button" class="btn btn-secondary" x-on:click="rejectedOpen = false; modalOpen = true; intent = ''; infliction = ''">
+                    Recheck
+                </button>
+                <a href="{{ url_for('registry.index') }}" class="btn btn-primary">
+                    End registry
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {% set use_modal_case = true %}
+    {% include "registry/_form.html" %}
+</div>
+{% endblock %}

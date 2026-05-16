@@ -12,6 +12,8 @@ class Registry(db.Model):
     date_of_presentation = db.Column(db.Date, nullable=False)
     time_of_presentation = db.Column(db.Time, nullable=True)
     reporting_department = db.Column(db.Enum("ER", "OPS"), nullable=False)
+    is_valid_registry_case = db.Column(db.Boolean, nullable=False, default=True)
+    invalid_reason = db.Column(db.String(255), nullable=True)
 
     patient_identifier = db.Column(db.String(100), nullable=False)
     age = db.Column(db.Integer, nullable=False)
@@ -38,7 +40,30 @@ class Registry(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     deleted_at = db.Column(db.DateTime, nullable=True)
 
-    case_ascertainment = db.relationship("CaseAscertainment", backref="registry", uselist=False)
-    incident_details = db.relationship("IncidentDetail", backref="registry", lazy=True)
-    psychiatric_history = db.relationship("PsychiatricHistory", backref="registry", uselist=False)
-    diagnosis_disposition = db.relationship("DiagnosisDisposition", backref="registry", uselist=False)
+    case_ascertainment = db.relationship(
+        "CaseAscertainment",
+        backref="registry",
+        cascade="all, delete-orphan",
+        single_parent=True,
+        uselist=False,
+    )
+    incident_details = db.relationship(
+        "IncidentDetail",
+        backref="registry",
+        cascade="all, delete-orphan",
+        lazy=True,
+    )
+    psychiatric_history = db.relationship(
+        "PsychiatricHistory",
+        backref="registry",
+        cascade="all, delete-orphan",
+        single_parent=True,
+        uselist=False,
+    )
+    diagnosis_disposition = db.relationship(
+        "DiagnosisDisposition",
+        backref="registry",
+        cascade="all, delete-orphan",
+        single_parent=True,
+        uselist=False,
+    )

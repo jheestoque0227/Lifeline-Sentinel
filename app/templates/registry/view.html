@@ -1,0 +1,115 @@
+{% extends "layouts/base.html" %}
+{% block title %}{{ registry.registry_code }}{% endblock %}
+{% macro value(label, data) %}
+<div>
+    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ label }}</p>
+    <p class="mt-1 text-sm font-medium text-slate-900 dark:text-white">{{ data if data not in [None, "", []] else "Not recorded" }}</p>
+</div>
+{% endmacro %}
+{% block content %}
+{% set incident = registry.incident_details[0] if registry.incident_details else none %}
+{% set history = registry.psychiatric_history %}
+<div class="space-y-6">
+    <div class="flex flex-wrap items-start justify-between gap-3">
+        <div>
+            <p class="text-sm font-semibold uppercase tracking-wide text-sentinel-600 dark:text-sentinel-100">Registry Details</p>
+            <h1 class="mt-1 text-2xl font-bold tracking-tight text-slate-950 dark:text-white">{{ registry.registry_code }}</h1>
+            {% if registry.deleted_at %}
+            <p class="mt-2 text-sm font-semibold text-red-600">Deleted on {{ registry.deleted_at.strftime("%Y-%m-%d %H:%M") }}: {{ registry.deleted_remarks }}</p>
+            {% endif %}
+        </div>
+        <div class="flex flex-wrap gap-2">
+            <a href="{{ url_for('registry.print_view', registry_id=registry.id) }}" class="btn btn-secondary">Print</a>
+            {% if current_user.role in ["Admin", "Encoder"] and not registry.deleted_at %}
+            <a href="{{ url_for('registry.edit', registry_id=registry.id) }}" class="btn btn-primary">Edit</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+        <h2 class="text-base font-bold text-slate-950 dark:text-white">Data Steward and Hospital Information</h2>
+        <div class="mt-4 grid gap-4 md:grid-cols-3 xl:grid-cols-5">
+            {{ value("Data steward", registry.data_steward_code) }}
+            {{ value("Hospital", registry.hospital_code) }}
+            {{ value("Presentation date", registry.date_of_presentation.strftime("%Y-%m-%d")) }}
+            {{ value("Presentation time", registry.time_of_presentation.strftime("%H:%M") if registry.time_of_presentation else none) }}
+            {{ value("Department", registry.reporting_department) }}
+        </div>
+    </section>
+
+    <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+        <h2 class="text-base font-bold text-slate-950 dark:text-white">Case Ascertainment</h2>
+        <div class="mt-4 grid gap-4 md:grid-cols-4">
+            {{ value("Intent", registry.case_ascertainment.intent if registry.case_ascertainment else none) }}
+            {{ value("Infliction", registry.case_ascertainment.infliction if registry.case_ascertainment else none) }}
+            {{ value("Consult type", registry.case_ascertainment.type_of_consult if registry.case_ascertainment else none) }}
+            {{ value("Other consult type", registry.case_ascertainment.type_of_consult_other if registry.case_ascertainment else none) }}
+        </div>
+    </section>
+
+    <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+        <h2 class="text-base font-bold text-slate-950 dark:text-white">Patient Details</h2>
+        <div class="mt-4 grid gap-4 md:grid-cols-3 xl:grid-cols-4">
+            {{ value("Patient identifier", registry.patient_identifier) }}
+            {{ value("Age", registry.age) }}
+            {{ value("Sex at birth", registry.sex_at_birth) }}
+            {{ value("Gender identity", registry.gender_identity) }}
+            {{ value("Sexual orientation", registry.sexual_orientation) }}
+            {{ value("Marital status", registry.marital_status) }}
+            {{ value("Education", registry.highest_educational_attainment) }}
+            {{ value("Employment", registry.employment_status) }}
+            {{ value("Nationality", registry.nationality) }}
+            {{ value("Religion", registry.religion) }}
+        </div>
+    </section>
+
+    <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+        <h2 class="text-base font-bold text-slate-950 dark:text-white">Incident Details</h2>
+        <div class="mt-4 grid gap-4 md:grid-cols-3 xl:grid-cols-4">
+            {{ value("First incident", "Yes" if incident and incident.is_first_incident else "No" if incident else none) }}
+            {{ value("Past 2-month incident", "Yes" if incident and incident.has_past_2_month_incident else "No" if incident and incident.has_past_2_month_incident is not none else none) }}
+            {{ value("Incident date", incident.incident_date.strftime("%Y-%m-%d") if incident and incident.incident_date else none) }}
+            {{ value("Time period", incident.incident_time_period if incident else none) }}
+            {{ value("Place", incident.incident_place if incident else none) }}
+            {{ value("Location", ((incident.incident_region or "") ~ " " ~ (incident.incident_province_city or "") ~ " " ~ (incident.incident_municipality or "")).strip() if incident else none) }}
+            {{ value("Self-poisoning methods", (incident.self_poisoning_methods or [])|join(", ") if incident else none) }}
+            {{ value("Self-harm methods", (incident.self_harm_methods or [])|join(", ") if incident else none) }}
+        </div>
+    </section>
+
+    <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+        <h2 class="text-base font-bold text-slate-950 dark:text-white">Psychiatric History</h2>
+        <div class="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {{ value("Previous consultation", "Yes" if history and history.previous_consultation else "No" if history and history.previous_consultation is not none else none) }}
+            {{ value("Family suicide history", "Yes" if history and history.family_history else "No" if history and history.family_history is not none else none) }}
+            {{ value("Friends, schoolmates, or colleagues history", "Yes" if history and history.friends_history else "No" if history and history.friends_history is not none else none) }}
+            {{ value("Lifetime substance use", "Yes" if history and history.substance_use else "No" if history and history.substance_use is not none else none) }}
+            {{ value("Substances", (history.substances or [])|join(", ") if history else none) }}
+            {{ value("Substance details", history.substance_details if history else none) }}
+            {{ value("Substance notes", history.substance_notes if history else none) }}
+        </div>
+    </section>
+
+    <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+        <h2 class="text-base font-bold text-slate-950 dark:text-white">Diagnosis and Disposition</h2>
+        <div class="mt-4 grid gap-4 md:grid-cols-3 xl:grid-cols-5">
+            {{ value("Primary ICD-10", registry.diagnosis_disposition.primary_diagnosis_code if registry.diagnosis_disposition else none) }}
+            {{ value("Secondary ICD-10", registry.diagnosis_disposition.secondary_diagnosis_code if registry.diagnosis_disposition else none) }}
+            {{ value("Risk level", registry.risk_level) }}
+            {{ value("Disposition", registry.diagnosis_disposition.disposition if registry.diagnosis_disposition else none) }}
+            {{ value("Remarks", registry.diagnosis_disposition.remarks if registry.diagnosis_disposition else none) }}
+        </div>
+    </section>
+
+    {% if current_user.role in ["Admin", "Encoder"] and not registry.deleted_at %}
+    <section class="rounded-lg border border-red-200 bg-red-50 p-5 dark:border-red-900/60 dark:bg-red-950/20">
+        <h2 class="text-base font-bold text-red-800 dark:text-red-100">Soft Delete Registry Entry</h2>
+        <form method="post" action="{{ url_for('registry.delete', registry_id=registry.id) }}" class="mt-4 space-y-3">
+            {{ delete_form.hidden_tag() }}
+            {{ delete_form.deleted_remarks(class="block min-h-24 w-full rounded-lg border border-red-200 bg-white px-3 py-2 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20 dark:border-red-900 dark:bg-slate-950 dark:text-white", placeholder="Required deletion remarks") }}
+            {{ delete_form.submit(class="btn btn-danger") }}
+        </form>
+    </section>
+    {% endif %}
+</div>
+{% endblock %}

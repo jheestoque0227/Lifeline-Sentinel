@@ -1,11 +1,14 @@
 <!doctype html>
-<html lang="en" x-data="{ sidebarOpen: false, sidebarCollapsed: false, sidebarAccountOpen: true, darkMode: localStorage.getItem('darkMode') === 'true' }" x-bind:class="{ 'dark': darkMode }">
+<html lang="en" x-data="{ sidebarOpen: false, sidebarCollapsed: false, sidebarAccountOpen: true, logoutConfirm: false, darkMode: localStorage.getItem('darkMode') === 'true' }" x-bind:class="{ 'dark': darkMode }">
 <head>
     <meta charset="utf-8">
     <title>{% block title %}Lifeline Sentinel{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="{{ url_for('static', filename='css/app.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='vendor/fontawesome/all.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='vendor/select2/select2.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='vendor/datatables/dataTables.dataTables.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/select2-theme.css') }}?v=datatables-theme" rel="stylesheet">
     <script defer src="{{ url_for('static', filename='vendor/alpine.min.js') }}"></script>
     <script src="{{ url_for('static', filename='vendor/chart.umd.js') }}"></script>
 </head>
@@ -25,7 +28,10 @@
             </div>
         {% endif %}
     </div>
+    <script src="{{ url_for('static', filename='vendor/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='vendor/select2/select2.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='vendor/datatables/dataTables.min.js') }}"></script>
     <script src="{{ url_for('static', filename='vendor/flowbite.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}?v=datatables-init"></script>
 </body>
 </html>

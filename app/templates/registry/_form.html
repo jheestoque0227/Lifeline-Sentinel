@@ -1,0 +1,292 @@
+{% macro errors(field) %}
+    {% if field.errors %}
+        <p class="mt-1 text-xs font-medium text-red-600">{{ field.errors|join(" ") }}</p>
+    {% endif %}
+{% endmacro %}
+
+{% macro field_input(field, class_name="") %}
+    {{ field(class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-sentinel-600 focus:outline-none focus:ring-2 focus:ring-sentinel-600/20 dark:border-slate-700 dark:bg-slate-950 dark:text-white " ~ class_name) }}
+    {{ errors(field) }}
+{% endmacro %}
+
+{% macro field_select(field, class_name="") %}
+    {{ field(class="js-registry-select mt-1 block w-full " ~ class_name, data_placeholder="Select...") }}
+    {{ errors(field) }}
+{% endmacro %}
+
+{% macro field_multi(field) %}
+    {{ field(class="js-example-basic-multiple mt-1 block w-full", data_placeholder="Select one or more options") }}
+    {{ errors(field) }}
+{% endmacro %}
+
+{% macro label(field, marker_id=None) %}
+    <label class="text-sm font-semibold text-slate-700 dark:text-slate-200" for="{{ field.id }}">
+        {{ field.label.text }}
+        {% if field.flags.required %}
+            <span class="required-asterisk" aria-hidden="true">*</span>
+        {% elif marker_id %}
+            <span class="required-asterisk hidden" data-required-marker-for="{{ marker_id }}" aria-hidden="true">*</span>
+        {% endif %}
+    </label>
+{% endmacro %}
+
+<form method="post" class="space-y-6" {% if use_modal_case|default(false) %}x-show="accepted" x-transition{% endif %} data-conditional-other-form>
+    {{ form.hidden_tag() }}
+    {% if use_modal_case|default(false) %}
+        <input type="hidden" name="intent" x-bind:value="intent">
+        <input type="hidden" name="infliction" x-bind:value="infliction">
+    {% endif %}
+
+    <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+        <h2 class="text-base font-bold text-slate-950 dark:text-white">Case Ascertainment</h2>
+        {% if use_modal_case|default(false) %}
+        <div class="mt-4 grid gap-4 md:grid-cols-2">
+            <div class="rounded-lg border border-sentinel-100 bg-sentinel-50 px-4 py-3 dark:border-sentinel-900 dark:bg-sentinel-900/20">
+                <p class="text-xs font-semibold uppercase tracking-wide text-sentinel-700 dark:text-sentinel-100">Intent</p>
+                <p class="mt-1 text-sm font-semibold text-slate-950 dark:text-white" x-text="intent"></p>
+            </div>
+            <div class="rounded-lg border border-sentinel-100 bg-sentinel-50 px-4 py-3 dark:border-sentinel-900 dark:bg-sentinel-900/20">
+                <p class="text-xs font-semibold uppercase tracking-wide text-sentinel-700 dark:text-sentinel-100">Infliction</p>
+                <p class="mt-1 text-sm font-semibold text-slate-950 dark:text-white" x-text="infliction"></p>
+            </div>
+        </div>
+        {% else %}
+        <div class="mt-4 grid gap-4 md:grid-cols-2">
+            <div>{{ label(form.intent) }}{{ field_select(form.intent) }}</div>
+            <div>{{ label(form.infliction) }}{{ field_select(form.infliction) }}</div>
+        </div>
+        {% endif %}
+        {% if use_modal_case|default(false) %}
+            {{ errors(form.intent) }}
+            {{ errors(form.infliction) }}
+        {% endif %}
+    </section>
+
+    <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+        <h2 class="text-base font-bold text-slate-950 dark:text-white">Data Steward and Hospital Information</h2>
+        <div class="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <div>{{ label(form.data_steward_code) }}{{ field_input(form.data_steward_code) }}</div>
+            <div>{{ label(form.hospital_code) }}{{ field_input(form.hospital_code) }}</div>
+            <div>{{ label(form.date_of_presentation) }}{{ field_input(form.date_of_presentation) }}</div>
+            <div>{{ label(form.time_of_presentation) }}{{ field_input(form.time_of_presentation) }}</div>
+            <div>{{ label(form.reporting_department) }}{{ field_select(form.reporting_department) }}</div>
+            <div>{{ label(form.type_of_consult) }}{{ form.type_of_consult(class="js-registry-select mt-1 block w-full", data_placeholder="Select...", data_other_trigger="type_of_consult_other") }}{{ errors(form.type_of_consult) }}</div>
+            <div>{{ label(form.type_of_consult_other, "type_of_consult_other") }}{{ form.type_of_consult_other(class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-sentinel-600 focus:outline-none focus:ring-2 focus:ring-sentinel-600/20 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:disabled:bg-slate-900 dark:disabled:text-slate-600", data_other_field="true") }}{{ errors(form.type_of_consult_other) }}</div>
+        </div>
+    </section>
+
+    <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+        <h2 class="text-base font-bold text-slate-950 dark:text-white">Patient Details</h2>
+        <div class="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <div>{{ label(form.patient_identifier) }}{{ field_input(form.patient_identifier) }}</div>
+            <div>{{ label(form.age) }}{{ field_input(form.age) }}</div>
+            <div>{{ label(form.sex_at_birth) }}{{ field_select(form.sex_at_birth) }}</div>
+            <div>{{ label(form.marital_status) }}{{ field_select(form.marital_status) }}</div>
+            <div>{{ label(form.sexual_orientation) }}{{ form.sexual_orientation(class="js-registry-select mt-1 block w-full", data_placeholder="Select...", data_other_trigger="sexual_orientation_other") }}{{ errors(form.sexual_orientation) }}</div>
+            <div>{{ label(form.sexual_orientation_other, "sexual_orientation_other") }}{{ form.sexual_orientation_other(class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-sentinel-600 focus:outline-none focus:ring-2 focus:ring-sentinel-600/20 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:disabled:bg-slate-900 dark:disabled:text-slate-600", data_other_field="true") }}{{ errors(form.sexual_orientation_other) }}</div>
+            <div>{{ label(form.gender_identity) }}{{ form.gender_identity(class="js-registry-select mt-1 block w-full", data_placeholder="Select...", data_other_trigger="gender_identity_other") }}{{ errors(form.gender_identity) }}</div>
+            <div>{{ label(form.gender_identity_other, "gender_identity_other") }}{{ form.gender_identity_other(class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-sentinel-600 focus:outline-none focus:ring-2 focus:ring-sentinel-600/20 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:disabled:bg-slate-900 dark:disabled:text-slate-600", data_other_field="true") }}{{ errors(form.gender_identity_other) }}</div>
+            <div>{{ label(form.highest_educational_attainment) }}{{ field_select(form.highest_educational_attainment) }}</div>
+            <div>{{ label(form.employment_status) }}{{ field_select(form.employment_status) }}</div>
+            <div>{{ label(form.nationality) }}{{ field_input(form.nationality) }}</div>
+            <div>{{ label(form.religion) }}{{ form.religion(class="js-registry-select mt-1 block w-full", data_placeholder="Select...", data_other_trigger="religion_other") }}{{ errors(form.religion) }}</div>
+            <div>{{ label(form.religion_other, "religion_other") }}{{ form.religion_other(class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-sentinel-600 focus:outline-none focus:ring-2 focus:ring-sentinel-600/20 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:disabled:bg-slate-900 dark:disabled:text-slate-600", data_other_field="true") }}{{ errors(form.religion_other) }}</div>
+        </div>
+    </section>
+
+    <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+        <h2 class="text-base font-bold text-slate-950 dark:text-white">Incident Details</h2>
+        <div class="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <div>{{ label(form.is_first_incident) }}{{ field_select(form.is_first_incident) }}</div>
+            <div>{{ label(form.has_past_2_month_incident) }}{{ field_select(form.has_past_2_month_incident) }}</div>
+            <div>{{ label(form.incident_date) }}{{ field_input(form.incident_date) }}</div>
+            <div>{{ label(form.incident_day) }}{{ field_input(form.incident_day) }}</div>
+            <div>{{ label(form.incident_time_period) }}{{ field_select(form.incident_time_period) }}</div>
+            <div>{{ label(form.incident_place) }}{{ form.incident_place(class="js-registry-select mt-1 block w-full", data_placeholder="Select...", data_other_trigger="incident_place_other") }}{{ errors(form.incident_place) }}</div>
+            <div>{{ label(form.incident_place_other, "incident_place_other") }}{{ form.incident_place_other(class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-sentinel-600 focus:outline-none focus:ring-2 focus:ring-sentinel-600/20 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:disabled:bg-slate-900 dark:disabled:text-slate-600", data_other_field="true") }}{{ errors(form.incident_place_other) }}</div>
+            <div>{{ label(form.incident_region) }}{{ field_input(form.incident_region) }}</div>
+            <div>{{ label(form.incident_province_city) }}{{ field_input(form.incident_province_city) }}</div>
+            <div>{{ label(form.incident_municipality) }}{{ field_input(form.incident_municipality) }}</div>
+        </div>
+        <div class="mt-4 grid min-w-0 gap-4 lg:grid-cols-2">
+            <div class="min-w-0">{{ label(form.self_poisoning_methods) }}{{ field_multi(form.self_poisoning_methods) }}</div>
+            <div class="min-w-0">{{ label(form.self_harm_methods) }}{{ field_multi(form.self_harm_methods) }}</div>
+        </div>
+        <div class="mt-4">{{ label(form.incident_remarks) }}{{ field_input(form.incident_remarks, "min-h-28") }}</div>
+    </section>
+
+    <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+        <h2 class="text-base font-bold text-slate-950 dark:text-white">Psychiatric History</h2>
+        <div class="mt-4 grid gap-4 lg:grid-cols-2">
+            <div class="space-y-3 rounded-lg border border-slate-200 p-4 dark:border-slate-800">
+                <div>{{ label(form.previous_consultation) }}{{ field_select(form.previous_consultation) }}</div>
+                <div>{{ label(form.previous_consultation_notes) }}{{ field_input(form.previous_consultation_notes, "min-h-24") }}</div>
+            </div>
+            <div class="space-y-3 rounded-lg border border-slate-200 p-4 dark:border-slate-800">
+                <div>{{ label(form.family_history) }}{{ field_select(form.family_history) }}</div>
+                <div>{{ label(form.family_history_notes) }}{{ field_input(form.family_history_notes, "min-h-24") }}</div>
+            </div>
+            <div class="space-y-3 rounded-lg border border-slate-200 p-4 dark:border-slate-800">
+                <div>{{ label(form.friends_history) }}{{ field_select(form.friends_history) }}</div>
+                <div>{{ label(form.friends_history_notes) }}{{ field_input(form.friends_history_notes, "min-h-24") }}</div>
+            </div>
+            <div class="space-y-3 rounded-lg border border-slate-200 p-4 dark:border-slate-800">
+                <div>{{ label(form.substance_use) }}{{ field_select(form.substance_use) }}</div>
+            </div>
+        </div>
+        <div class="mt-5 rounded-lg border border-slate-200 p-4 dark:border-slate-800">
+            <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">If yes, tick all substances used and specify type</p>
+            {{ errors(form.substances) }}
+            <div class="mt-4 border-t border-slate-200 pt-4 dark:border-slate-800">
+                <div class="substance-grid">
+                    <label class="flex min-h-12 items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200">
+                        <input type="checkbox" name="{{ form.substances.name }}" value="Alcohol" {% if "Alcohol" in (form.substances.data or []) %}checked{% endif %} class="registry-checkbox rounded border-slate-300 text-sentinel-600 focus:ring-sentinel-600" style="accent-color: #2756A5;" data-substance-trigger="alcohol_type">
+                        Alcohol
+                    </label>
+                    <label class="flex min-h-12 items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200">
+                        <input type="checkbox" name="{{ form.substances.name }}" value="Methamphetamine" {% if "Methamphetamine" in (form.substances.data or []) %}checked{% endif %} class="registry-checkbox rounded border-slate-300 text-sentinel-600 focus:ring-sentinel-600" style="accent-color: #2756A5;" data-substance-trigger="methamphetamine_type">
+                        Methamphetamine
+                    </label>
+                    <label class="flex min-h-12 items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200">
+                        <input type="checkbox" name="{{ form.substances.name }}" value="Cannabinoids" {% if "Cannabinoids" in (form.substances.data or []) %}checked{% endif %} class="registry-checkbox rounded border-slate-300 text-sentinel-600 focus:ring-sentinel-600" style="accent-color: #2756A5;" data-substance-trigger="cannabinoids_type">
+                        Cannabinoids
+                    </label>
+                    <label class="flex min-h-12 items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200">
+                        <input type="checkbox" name="{{ form.substances.name }}" value="Prescription drugs" {% if "Prescription drugs" in (form.substances.data or []) %}checked{% endif %} class="registry-checkbox rounded border-slate-300 text-sentinel-600 focus:ring-sentinel-600" style="accent-color: #2756A5;" data-substance-trigger="prescription_drugs_type">
+                        Prescription drugs
+                    </label>
+                </div>
+                <div class="substance-grid mt-4 border-t border-slate-200 pt-4 dark:border-slate-800">
+                    <div>
+                        <label class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400" for="{{ form.alcohol_type.id }}">Alcohol type <span class="required-asterisk hidden" data-required-marker-for="alcohol_type" aria-hidden="true">*</span></label>
+                        {{ form.alcohol_type(class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950 dark:text-white", placeholder="Specify type") }}
+                        {{ errors(form.alcohol_type) }}
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400" for="{{ form.methamphetamine_type.id }}">Methamphetamine type <span class="required-asterisk hidden" data-required-marker-for="methamphetamine_type" aria-hidden="true">*</span></label>
+                        {{ form.methamphetamine_type(class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950 dark:text-white", placeholder="Specify type") }}
+                        {{ errors(form.methamphetamine_type) }}
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400" for="{{ form.cannabinoids_type.id }}">Cannabinoids type <span class="required-asterisk hidden" data-required-marker-for="cannabinoids_type" aria-hidden="true">*</span></label>
+                        {{ form.cannabinoids_type(class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950 dark:text-white", placeholder="Specify type") }}
+                        {{ errors(form.cannabinoids_type) }}
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400" for="{{ form.prescription_drugs_type.id }}">Prescription drugs type <span class="required-asterisk hidden" data-required-marker-for="prescription_drugs_type" aria-hidden="true">*</span></label>
+                        {{ form.prescription_drugs_type(class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950 dark:text-white", placeholder="Specify type") }}
+                        {{ errors(form.prescription_drugs_type) }}
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4 border-t border-slate-200 pt-4 dark:border-slate-800">
+                {{ label(form.substance_notes) }}
+                {{ field_input(form.substance_notes, "min-h-24") }}
+            </div>
+        </div>
+    </section>
+
+    <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+        <h2 class="text-base font-bold text-slate-950 dark:text-white">Diagnosis and Disposition</h2>
+        <div class="mt-4 grid gap-4 md:grid-cols-2">
+            <div>{{ label(form.primary_diagnosis_code) }}{{ field_select(form.primary_diagnosis_code) }}</div>
+            <div>{{ label(form.secondary_diagnosis_code) }}{{ field_select(form.secondary_diagnosis_code) }}</div>
+            <div>{{ label(form.disposition) }}{{ form.disposition(class="js-registry-select mt-1 block w-full", data_placeholder="Select...", data_other_trigger="disposition_other") }}{{ errors(form.disposition) }}</div>
+            <div>{{ label(form.disposition_other, "disposition_other") }}{{ form.disposition_other(class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-sentinel-600 focus:outline-none focus:ring-2 focus:ring-sentinel-600/20 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:disabled:bg-slate-900 dark:disabled:text-slate-600", data_other_field="true") }}{{ errors(form.disposition_other) }}</div>
+        </div>
+        <div class="mt-4">{{ label(form.diagnosis_remarks) }}{{ field_input(form.diagnosis_remarks, "min-h-28") }}</div>
+    </section>
+
+    <div class="flex flex-wrap items-center justify-end gap-3">
+        <a href="{{ url_for('registry.index') }}" class="btn btn-secondary">Cancel</a>
+        {{ form.submit(class="btn btn-primary registry-save-button") }}
+    </div>
+</form>
+
+<script>
+    (function () {
+        function syncConditionalOtherFields(root) {
+            (root || document).querySelectorAll("[data-other-trigger]").forEach(function (trigger) {
+                var target = document.getElementById(trigger.dataset.otherTrigger);
+                if (!target) return;
+
+                var isOther = (trigger.value || "").trim().toLowerCase() === "other";
+                target.disabled = !isOther;
+                target.required = isOther;
+                target.setAttribute("aria-disabled", isOther ? "false" : "true");
+                document.querySelectorAll('[data-required-marker-for="' + target.id + '"]').forEach(function (marker) {
+                    marker.classList.toggle("hidden", !isOther);
+                });
+                if (!isOther) {
+                    target.value = "";
+                }
+            });
+        }
+
+        function bindConditionalOtherFields(root) {
+            (root || document).querySelectorAll("[data-other-trigger]").forEach(function (trigger) {
+                if (trigger.dataset.otherBound === "true") return;
+                trigger.dataset.otherBound = "true";
+                trigger.addEventListener("change", function () {
+                    syncConditionalOtherFields(root || document);
+                });
+            });
+            syncConditionalOtherFields(root || document);
+        }
+
+        function syncSubstanceTypeFields(root) {
+            (root || document).querySelectorAll("[data-substance-trigger]").forEach(function (trigger) {
+                var target = document.getElementById(trigger.dataset.substanceTrigger);
+                if (!target) return;
+
+                target.disabled = !trigger.checked;
+                target.required = trigger.checked;
+                target.setAttribute("aria-disabled", trigger.checked ? "false" : "true");
+                document.querySelectorAll('[data-required-marker-for="' + target.id + '"]').forEach(function (marker) {
+                    marker.classList.toggle("hidden", !trigger.checked);
+                });
+                if (!trigger.checked) {
+                    target.value = "";
+                }
+            });
+        }
+
+        function bindSubstanceTypeFields(root) {
+            (root || document).querySelectorAll("[data-substance-trigger]").forEach(function (trigger) {
+                if (trigger.dataset.substanceBound === "true") return;
+                trigger.dataset.substanceBound = "true";
+                trigger.addEventListener("change", function () {
+                    syncSubstanceTypeFields(root || document);
+                });
+            });
+            syncSubstanceTypeFields(root || document);
+        }
+
+        window.bindRegistryConditionalOtherFields = function (root) {
+            bindConditionalOtherFields(root);
+            bindSubstanceTypeFields(root);
+        };
+
+        window.rebuildRegistrySelect2 = function (root) {
+            if (window.initRegistrySelect2) {
+                window.initRegistrySelect2(root || document);
+            }
+        };
+
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", function () {
+                bindConditionalOtherFields(document);
+                bindSubstanceTypeFields(document);
+                window.setTimeout(function () {
+                    window.rebuildRegistrySelect2(document);
+                }, 0);
+            });
+        } else {
+            bindConditionalOtherFields(document);
+            bindSubstanceTypeFields(document);
+            window.setTimeout(function () {
+                window.rebuildRegistrySelect2(document);
+            }, 0);
+        }
+    })();
+</script>

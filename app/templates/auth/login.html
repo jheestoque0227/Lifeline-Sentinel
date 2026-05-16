@@ -24,10 +24,13 @@
                     <label class="text-sm font-medium text-slate-700 dark:text-slate-200" for="password">Password</label>
                     <input class="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-sentinel-600 focus:ring-4 focus:ring-sentinel-100 dark:border-slate-700 dark:bg-slate-950 dark:focus:ring-sentinel-900" id="password" name="password" type="password" required>
                 </div>
-                <div class="flex items-center justify-end">
+                <div class="flex items-center justify-center">
                     <a class="text-sm font-semibold text-sentinel-600 hover:text-sentinel-700 dark:text-sentinel-100" href="{{ url_for('auth.forgot_password') }}">Forgot password?</a>
                 </div>
-                <button class="w-full rounded-2xl bg-sentinel-600 px-4 py-3 text-sm font-semibold text-white shadow-soft transition hover:bg-sentinel-700" type="submit">Login</button>
+                <button class="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-sentinel-600 px-4 py-3 text-sm font-semibold text-white shadow-soft transition hover:bg-sentinel-700" type="submit">
+                    <i class="fa-solid fa-right-to-bracket"></i>
+                    Login
+                </button>
             </form>
         </section>
     </div>

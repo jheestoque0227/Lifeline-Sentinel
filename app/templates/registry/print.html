@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>{{ registry.registry_code }} Print</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { color: #0f172a; font-family: Arial, sans-serif; font-size: 12px; line-height: 1.4; margin: 24px; }
+        h1 { font-size: 22px; margin: 0; }
+        h2 { border-bottom: 1px solid #cbd5e1; color: #075985; font-size: 14px; margin: 22px 0 10px; padding-bottom: 4px; }
+        .meta { color: #475569; margin-top: 4px; }
+        .grid { display: grid; gap: 8px 18px; grid-template-columns: repeat(3, 1fr); }
+        .label { color: #475569; font-size: 10px; font-weight: bold; text-transform: uppercase; }
+        .value { margin-top: 2px; }
+        .actions { margin-bottom: 20px; }
+        .actions button { background: #0ea5e9; border: 0; border-radius: 6px; color: white; cursor: pointer; padding: 8px 12px; }
+        @media print { .actions { display: none; } body { margin: 0.5in; } }
+    </style>
+</head>
+<body>
+{% set incident = registry.incident_details[0] if registry.incident_details else none %}
+{% macro item(label, value) %}
+<div>
+    <div class="label">{{ label }}</div>
+    <div class="value">{{ value if value not in [None, "", []] else "Not recorded" }}</div>
+</div>
+{% endmacro %}
+<div class="actions">
+    <button type="button" onclick="window.print()">Print</button>
+</div>
+<h1>{{ registry.registry_code }}</h1>
+<div class="meta">Lifeline Sentinel SSASH Registry Details</div>
+
+<h2>Data Steward and Hospital Information</h2>
+<div class="grid">
+    {{ item("Data steward", registry.data_steward_code) }}
+    {{ item("Hospital", registry.hospital_code) }}
+    {{ item("Presentation date", registry.date_of_presentation.strftime("%Y-%m-%d")) }}
+    {{ item("Presentation time", registry.time_of_presentation.strftime("%H:%M") if registry.time_of_presentation else none) }}
+    {{ item("Department", registry.reporting_department) }}
+</div>
+
+<h2>Case Ascertainment</h2>
+<div class="grid">
+    {{ item("Intent", registry.case_ascertainment.intent if registry.case_ascertainment else none) }}
+    {{ item("Infliction", registry.case_ascertainment.infliction if registry.case_ascertainment else none) }}
+    {{ item("Consult type", registry.case_ascertainment.type_of_consult if registry.case_ascertainment else none) }}
+</div>
+
+<h2>Patient Details</h2>
+<div class="grid">
+    {{ item("Patient identifier", registry.patient_identifier) }}
+    {{ item("Age", registry.age) }}
+    {{ item("Sex at birth", registry.sex_at_birth) }}
+    {{ item("Gender identity", registry.gender_identity) }}
+    {{ item("Sexual orientation", registry.sexual_orientation) }}
+    {{ item("Marital status", registry.marital_status) }}
+    {{ item("Education", registry.highest_educational_attainment) }}
+    {{ item("Employment", registry.employment_status) }}
+    {{ item("Nationality", registry.nationality) }}
+    {{ item("Religion", registry.religion) }}
+</div>
+
+<h2>Incident Details</h2>
+<div class="grid">
+    {{ item("First incident", "Yes" if incident and incident.is_first_incident else "No" if incident else none) }}
+    {{ item("Past 2-month incident", "Yes" if incident and incident.has_past_2_month_incident else "No" if incident and incident.has_past_2_month_incident is not none else none) }}
+    {{ item("Incident date", incident.incident_date.strftime("%Y-%m-%d") if incident and incident.incident_date else none) }}
+    {{ item("Time period", incident.incident_time_period if incident else none) }}
+    {{ item("Place", incident.incident_place if incident else none) }}
+    {{ item("Self-poisoning methods", (incident.self_poisoning_methods or [])|join(", ") if incident else none) }}
+    {{ item("Self-harm methods", (incident.self_harm_methods or [])|join(", ") if incident else none) }}
+    {{ item("Remarks", incident.remarks if incident else none) }}
+</div>
+
+<h2>Psychiatric History</h2>
+<div class="grid">
+    {{ item("Previous consultation", "Yes" if registry.psychiatric_history and registry.psychiatric_history.previous_consultation else "No" if registry.psychiatric_history and registry.psychiatric_history.previous_consultation is not none else none) }}
+    {{ item("Family history", "Yes" if registry.psychiatric_history and registry.psychiatric_history.family_history else "No" if registry.psychiatric_history and registry.psychiatric_history.family_history is not none else none) }}
+    {{ item("Friends/peer history", "Yes" if registry.psychiatric_history and registry.psychiatric_history.friends_history else "No" if registry.psychiatric_history and registry.psychiatric_history.friends_history is not none else none) }}
+    {{ item("Substance use", "Yes" if registry.psychiatric_history and registry.psychiatric_history.substance_use else "No" if registry.psychiatric_history and registry.psychiatric_history.substance_use is not none else none) }}
+    {{ item("Substances", (registry.psychiatric_history.substances or [])|join(", ") if registry.psychiatric_history else none) }}
+    {{ item("Substance details", registry.psychiatric_history.substance_details if registry.psychiatric_history else none) }}
+    {{ item("Substance notes", registry.psychiatric_history.substance_notes if registry.psychiatric_history else none) }}
+</div>
+
+<h2>Diagnosis and Disposition</h2>
+<div class="grid">
+    {{ item("Primary ICD-10", registry.diagnosis_disposition.primary_diagnosis_code if registry.diagnosis_disposition else none) }}
+    {{ item("Secondary ICD-10", registry.diagnosis_disposition.secondary_diagnosis_code if registry.diagnosis_disposition else none) }}
+    {{ item("Risk level", registry.risk_level) }}
+    {{ item("Disposition", registry.diagnosis_disposition.disposition if registry.diagnosis_disposition else none) }}
+    {{ item("Remarks", registry.diagnosis_disposition.remarks if registry.diagnosis_disposition else none) }}
+</div>
+</body>
+</html>

@@ -14,4 +14,5 @@ class PsychiatricHistory(db.Model):
     friends_history_notes = db.Column(db.Text, nullable=True)
     substance_use = db.Column(db.Boolean, nullable=True)
     substances = db.Column(db.JSON, nullable=True)
+    substance_details = db.Column(db.JSON, nullable=True)
     substance_notes = db.Column(db.Text, nullable=True)

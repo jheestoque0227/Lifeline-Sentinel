@@ -1,0 +1,14 @@
+{% extends "layouts/base.html" %}
+{% block title %}Edit {{ registry.registry_code }}{% endblock %}
+{% block content %}
+<div class="space-y-6">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+            <p class="text-sm font-semibold uppercase tracking-wide text-sentinel-600 dark:text-sentinel-100">Registry</p>
+            <h1 class="mt-1 text-2xl font-bold tracking-tight text-slate-950 dark:text-white">Edit {{ registry.registry_code }}</h1>
+        </div>
+        <a href="{{ url_for('registry.view', registry_id=registry.id) }}" class="btn btn-secondary">Back to details</a>
+    </div>
+    {% include "registry/_form.html" %}
+</div>
+{% endblock %}

@@ -1,36 +1,55 @@
 {% extends "layouts/base.html" %}
-{% import "components/cards.html" as cards %}
-{% block page_title %}Registry Module{% endblock %}
+{% block title %}Registry{% endblock %}
 {% block content %}
 <div class="space-y-6">
-    <div>
-        <p class="text-sm font-semibold uppercase tracking-wide text-sentinel-600 dark:text-sentinel-100">Registry</p>
-        <h2 class="mt-1 text-2xl font-bold tracking-tight text-slate-950 dark:text-white">SSASH Registry Workspace</h2>
-        <p class="mt-2 max-w-3xl text-sm text-slate-500 dark:text-slate-400">Structured registry management prepared for case intake, validation, and surveillance workflows.</p>
+    <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+            <p class="text-sm font-semibold uppercase tracking-wide text-sentinel-600 dark:text-sentinel-100">Registry</p>
+            <h1 class="mt-1 text-2xl font-bold tracking-tight text-slate-950 dark:text-white">SSASH Registry List</h1>
+            <p class="mt-2 max-w-3xl text-sm text-slate-500 dark:text-slate-400">Patient registry entries for suicide and self-harm surveillance.</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+            <a href="{{ url_for('registry.search') }}" class="btn btn-secondary">Search</a>
+            <a href="{{ url_for('registry.statistics') }}" class="btn btn-soft">Statistics</a>
+            <a href="{{ url_for('registry.create') }}" class="btn btn-primary">+ Add New Entry</a>
+        </div>
     </div>
-    <div class="grid gap-4 md:grid-cols-3">
-        {{ cards.metric_card("Open records", "0", "Cases requiring action") }}
-        {{ cards.metric_card("Validated today", "0", "Ready for reporting") }}
-        {{ cards.metric_card("Data quality flags", "0", "No checks running") }}
-    </div>
-    {% call cards.panel("Registry Queue", "Case table component ready for SSASH form integration") %}
+
+    <section class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-soft dark:border-slate-800 dark:bg-slate-900">
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800">
+            <table class="js-data-table min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800">
                 <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-950 dark:text-slate-400">
                     <tr>
-                        <th class="px-4 py-3">Case ID</th>
+                        <th class="px-4 py-3">Registry code</th>
+                        <th class="px-4 py-3">Patient identifier</th>
+                        <th class="px-4 py-3">Presentation</th>
+                        <th class="px-4 py-3">Department</th>
+                        <th class="px-4 py-3">Risk</th>
                         <th class="px-4 py-3">Status</th>
-                        <th class="px-4 py-3">Assigned Role</th>
-                        <th class="px-4 py-3">Updated</th>
+                        <th class="no-sort px-4 py-3 text-right">Actions</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr>
-                        <td colspan="4" class="px-4 py-8 text-center text-slate-500 dark:text-slate-400">Registry records will appear here once intake forms are connected.</td>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                    {% for registry in registries %}
+                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-950">
+                        <td class="px-4 py-3 font-semibold text-slate-950 dark:text-white">{{ registry.registry_code }}</td>
+                        <td class="px-4 py-3">{{ registry.patient_identifier }}</td>
+                        <td class="px-4 py-3">{{ registry.date_of_presentation.strftime("%Y-%m-%d") }}</td>
+                        <td class="px-4 py-3">{{ registry.reporting_department }}</td>
+                        <td class="px-4 py-3">{{ registry.risk_level or "Low" }}</td>
+                        <td class="px-4 py-3">{{ "Deleted" if registry.deleted_at else "Active" }}</td>
+                        <td class="px-4 py-3 text-right">
+                            <a class="font-semibold text-sentinel-700 hover:text-sentinel-900 dark:text-sentinel-100" href="{{ url_for('registry.view', registry_id=registry.id) }}">View</a>
+                        </td>
                     </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="px-4 py-10 text-center text-slate-500 dark:text-slate-400">No registry entries found.</td>
+                    </tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </div>
-    {% endcall %}
+    </section>
 </div>
 {% endblock %}

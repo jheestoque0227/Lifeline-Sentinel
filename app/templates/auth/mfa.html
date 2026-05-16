@@ -7,7 +7,8 @@
         <section class="rounded-2xl border border-white/70 bg-white/90 p-6 shadow-soft backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/90 sm:p-8">
             <div class="mb-8 text-center">
                 <img class="mx-auto h-28 w-auto" src="{{ url_for('static', filename='img/lifeline-sentinel-login-logo.png') }}" alt="Lifeline Sentinel logo">
-                <h2 class="mt-6 text-2xl font-bold text-slate-950 dark:text-white">Email verification</h2>
+                <p class="mt-5 text-sm font-semibold uppercase tracking-wide text-sentinel-700 dark:text-sentinel-100">Lifeline Sentinel</p>
+                <h2 class="mt-2 text-2xl font-bold text-slate-950 dark:text-white">Email verification</h2>
                 <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Enter the {{ expires_minutes }}-minute code sent to {{ email }}.</p>
             </div>
             <form method="post" action="{{ url_for('auth.mfa_verify') }}" class="space-y-5">

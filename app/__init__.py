@@ -6,23 +6,9 @@ from .config import Config
 from .extensions import db, mail, migrate, login_manager
 
 
-def _print_mail_debug(app):
-    password = app.config.get("MAIL_PASSWORD") or ""
-    username = app.config.get("MAIL_USERNAME") or ""
-    masked_username = "(empty)" if not username else f"{username[:2]}***@{username.split('@')[-1] if '@' in username else 'no-domain'}"
-    print("MAIL CONFIG BEFORE Mail(app)")
-    print(f"MAIL_USERNAME={masked_username}")
-    print(f"MAIL_PASSWORD_LENGTH={len(password)}")
-    print(f"MAIL_SERVER={app.config.get('MAIL_SERVER')}")
-    print(f"MAIL_PORT={app.config.get('MAIL_PORT')} type={type(app.config.get('MAIL_PORT')).__name__}")
-    print(f"MAIL_USE_TLS={app.config.get('MAIL_USE_TLS')} type={type(app.config.get('MAIL_USE_TLS')).__name__}")
-    print(f"MAIL_USE_SSL={app.config.get('MAIL_USE_SSL')} type={type(app.config.get('MAIL_USE_SSL')).__name__}")
-
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
-
-    _print_mail_debug(app)
 
     db.init_app(app)
     mail.init_app(app)
@@ -45,8 +31,7 @@ def create_app(config_class=Config):
     from .cli import register_cli
     register_cli(app)
 
-    from .models.user import User
-    from .models.audit_log import AuditLog  # noqa: F401
+    from .models import AuditLog, CaseAscertainment, DiagnosisDisposition, IncidentDetail, PsychiatricHistory, Registry, User  # noqa: F401
 
     @app.before_request
     def manage_authenticated_session():
