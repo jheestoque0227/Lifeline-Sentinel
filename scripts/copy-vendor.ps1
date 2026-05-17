@@ -11,6 +11,7 @@ Copy-Item -Force (Join-Path $PSScriptRoot "..\node_modules\chart.js\dist\chart.u
 Copy-Item -Force (Join-Path $PSScriptRoot "..\node_modules\flowbite\dist\flowbite.min.js") (Join-Path $vendorDir "flowbite.min.js")
 Copy-Item -Force (Join-Path $PSScriptRoot "..\node_modules\jquery\dist\jquery.min.js") (Join-Path $vendorDir "jquery.min.js")
 Copy-Item -Force (Join-Path $PSScriptRoot "..\node_modules\@fontsource\inter\files\*") $fontDir
+Copy-Item -Force (Join-Path $PSScriptRoot "..\node_modules\@fontsource\poppins\files\*") $fontDir
 
 $select2Dir = Join-Path $vendorDir "select2"
 New-Item -ItemType Directory -Force -Path $select2Dir | Out-Null

@@ -78,23 +78,53 @@ window.initDataTables = function initDataTables(root) {
     window.jQuery(scope).find("table.js-data-table").addBack("table.js-data-table").each(function () {
         const $table = window.jQuery(this);
         if (window.jQuery.fn.DataTable.isDataTable(this)) return;
-        $table.DataTable({
+        const dataTable = $table.DataTable({
             autoWidth: false,
             pageLength: 10,
             lengthMenu: [10, 25, 50, 100],
             order: [],
             responsive: false,
+            layout: {
+                topStart: null,
+                topEnd: "search",
+                bottomStart: ["pageLength", "info"],
+                bottomEnd: "paging"
+            },
             language: {
                 search: "",
-                searchPlaceholder: "Search table...",
-                lengthMenu: "Show _MENU_ entries",
+                searchPlaceholder: "Search",
+                lengthMenu: "_MENU_",
                 info: "Showing _START_ to _END_ of _TOTAL_ entries",
-                emptyTable: "No records found"
+                emptyTable: "No data available"
             },
             columnDefs: [
                 { orderable: false, targets: "no-sort" }
             ]
         });
+        const $container = window.jQuery(dataTable.table().container());
+        $container.find(".dt-search label").each(function () {
+            const $label = window.jQuery(this);
+            const $input = $label.find("input").detach();
+            $label.replaceWith($input);
+        });
+    });
+};
+
+window.refreshDataTables = function refreshDataTables() {
+    if (!window.jQuery || !window.jQuery.fn || !window.jQuery.fn.DataTable) return;
+    window.jQuery("table.js-data-table").each(function () {
+        if (!window.jQuery.fn.DataTable.isDataTable(this)) return;
+        const table = window.jQuery(this).DataTable();
+        table.columns.adjust();
+        if (table.responsive && typeof table.responsive.recalc === "function") {
+            table.responsive.recalc();
+        }
+    });
+};
+
+window.scheduleDataTableRefresh = function scheduleDataTableRefresh() {
+    [0, 120, 320].forEach((delay) => {
+        window.setTimeout(window.refreshDataTables, delay);
     });
 };
 
@@ -167,4 +197,15 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     });
+
+    document.querySelectorAll("[aria-label='Collapse sidebar']").forEach((button) => {
+        button.addEventListener("click", window.scheduleDataTableRefresh);
+    });
+
+    window.addEventListener("resize", () => {
+        window.clearTimeout(window._dataTableResizeTimer);
+        window._dataTableResizeTimer = window.setTimeout(window.refreshDataTables, 120);
+    });
+
+    window.scheduleDataTableRefresh();
 });

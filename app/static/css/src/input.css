@@ -8,6 +8,10 @@
 @import "../../../../node_modules/@fontsource/inter/500.css";
 @import "../../../../node_modules/@fontsource/inter/600.css";
 @import "../../../../node_modules/@fontsource/inter/700.css";
+@import "../../../../node_modules/@fontsource/poppins/400.css";
+@import "../../../../node_modules/@fontsource/poppins/500.css";
+@import "../../../../node_modules/@fontsource/poppins/600.css";
+@import "../../../../node_modules/@fontsource/poppins/700.css";
 
 @layer base {
     :root {
@@ -18,8 +22,13 @@
         --chart-label-color: #cbd5e1;
     }
 
-    body {
-        font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    body,
+    button,
+    input,
+    select,
+    textarea,
+    table {
+        font-family: "Poppins", Inter, ui-sans-serif, system-ui, sans-serif;
     }
 
     [x-cloak] {

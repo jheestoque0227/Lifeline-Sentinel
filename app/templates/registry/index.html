@@ -5,13 +5,16 @@
     <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
             <p class="text-sm font-semibold uppercase tracking-wide text-sentinel-600 dark:text-sentinel-100">Registry</p>
-            <h1 class="mt-1 text-2xl font-bold tracking-tight text-slate-950 dark:text-white">SSASH Registry List</h1>
-            <p class="mt-2 max-w-3xl text-sm text-slate-500 dark:text-slate-400">Patient registry entries for suicide and self-harm surveillance.</p>
+            <h1 class="mt-1 text-2xl font-bold tracking-tight text-slate-950 dark:text-white">Surveillance Registry List</h1>
+            <p class="mt-2 max-w-3xl text-sm text-slate-500 dark:text-slate-400">Patient registry entries for suicide attempts and self-harm surveillance.</p>
         </div>
         <div class="flex flex-wrap gap-2">
             <a href="{{ url_for('registry.search') }}" class="btn btn-secondary">Search</a>
             <a href="{{ url_for('registry.statistics') }}" class="btn btn-soft">Statistics</a>
-            <a href="{{ url_for('registry.create') }}" class="btn btn-primary">+ Add New Entry</a>
+            <a href="{{ url_for('registry.create') }}" class="btn btn-primary">
+                <i class="fa-solid fa-plus text-sm" aria-hidden="true"></i>
+                <span>Add New Entry</span>
+            </a>
         </div>
     </div>
 
