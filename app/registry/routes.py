@@ -1,6 +1,9 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
+from flask import jsonify, request
+from app.services.mssql_service import search_patients
+
 from app.auth.decorators import role_required
 from app.extensions import db
 from app.models.registry import Registry
@@ -32,6 +35,16 @@ def index():
     ).all()
     return render_template("registry/index.html", registries=registries)
 
+@registry_bp.route("/api/patient-search")
+def patient_search():
+    keyword = request.args.get("q", "").strip()
+
+    if not keyword:
+        return jsonify([])
+
+    results = search_patients(keyword)
+
+    return jsonify(results)
 
 @registry_bp.route("/search", methods=["GET", "POST"])
 @login_required
