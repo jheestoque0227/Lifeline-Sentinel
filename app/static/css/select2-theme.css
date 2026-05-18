@@ -45,9 +45,10 @@ table,
     font-family: "Poppins", Inter, ui-sans-serif, system-ui, sans-serif;
 }
 
-.space-y-6[data-conditional-other-form] input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
+.space-y-6[data-conditional-other-form] input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="reset"]),
 .space-y-6[data-conditional-other-form] select,
 .space-y-6[data-conditional-other-form] textarea {
+    width: 100%;
     min-height: 2.625rem;
     border-color: #cbd5e1;
     border-radius: 0.5rem;
@@ -58,12 +59,21 @@ table,
     transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
 }
 
+.space-y-6[data-conditional-other-form] input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="reset"]),
+.space-y-6[data-conditional-other-form] select {
+    height: 2.625rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+}
+
 .space-y-6[data-conditional-other-form] textarea {
     min-height: 6rem;
+    padding-top: 0.625rem;
+    padding-bottom: 0.625rem;
     resize: vertical;
 }
 
-.space-y-6[data-conditional-other-form] input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):focus,
+.space-y-6[data-conditional-other-form] input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="reset"]):focus,
 .space-y-6[data-conditional-other-form] select:focus,
 .space-y-6[data-conditional-other-form] textarea:focus {
     border-color: #2563eb;
@@ -92,7 +102,19 @@ table,
 }
 
 .space-y-6[data-conditional-other-form] label {
+    display: inline-block;
+    min-height: 1.25rem;
     line-height: 1.35;
+}
+
+.space-y-6[data-conditional-other-form] .select2-container {
+    display: block;
+    margin-top: 0.25rem;
+}
+
+.space-y-6[data-conditional-other-form] select.js-registry-select + .select2-container,
+.space-y-6[data-conditional-other-form] select.js-example-basic-multiple + .select2-container {
+    margin-top: 0.25rem;
 }
 
 .required-asterisk {
@@ -155,6 +177,23 @@ table,
     border-color: #2756a5 !important;
     background-color: #2756a5 !important;
     accent-color: #2756a5 !important;
+}
+
+.method-checkbox-row {
+    display: grid !important;
+    grid-template-columns: 1rem minmax(0, 1fr);
+    align-items: start;
+    column-gap: 0.5rem;
+    line-height: 1.4;
+}
+
+.method-checkbox-row input[type="checkbox"] {
+    margin-top: 0.125rem;
+}
+
+.method-checkbox-row span {
+    min-width: 0;
+    overflow-wrap: anywhere;
 }
 
 .btn-secondary {
@@ -260,7 +299,7 @@ select:disabled {
     color: #64748b;
 }
 
-.dark .space-y-6[data-conditional-other-form] input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
+.dark .space-y-6[data-conditional-other-form] input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="reset"]),
 .dark .space-y-6[data-conditional-other-form] select,
 .dark .space-y-6[data-conditional-other-form] textarea {
     border-color: #334155;
@@ -278,7 +317,7 @@ select:disabled {
     background-color: #2756a5 !important;
 }
 
-.dark .space-y-6[data-conditional-other-form] input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):focus,
+.dark .space-y-6[data-conditional-other-form] input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="reset"]):focus,
 .dark .space-y-6[data-conditional-other-form] select:focus,
 .dark .space-y-6[data-conditional-other-form] textarea:focus {
     border-color: #60a5fa;
@@ -354,13 +393,20 @@ select:disabled {
     overflow: hidden;
 }
 
+.select2-container--default .select2-selection--single {
+    height: 2.625rem;
+}
+
 .select2-container--default .select2-selection--multiple {
     height: auto;
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
 }
 
 .select2-container--default .select2-selection--single {
     display: flex;
     align-items: center;
+    box-sizing: border-box;
     padding: 0 0.75rem;
 }
 
@@ -753,6 +799,14 @@ select:disabled {
     margin: 0 !important;
 }
 
+.patient-search-modal table.dataTable tbody > tr {
+    cursor: pointer;
+}
+
+.patient-search-modal table.dataTable tbody > tr:hover > td {
+    background-color: #eff6ff;
+}
+
 .dark .dt-container {
     color: #cbd5e1;
 }
@@ -797,6 +851,10 @@ select:disabled {
     background-color: #64748b !important;
     background-image: none !important;
     color: #ffffff !important;
+}
+
+.dark .patient-search-modal table.dataTable tbody > tr:hover > td {
+    background-color: rgba(30, 64, 175, 0.25);
 }
 
 @media (max-width: 900px) {

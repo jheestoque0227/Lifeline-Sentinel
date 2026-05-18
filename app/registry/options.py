@@ -21,8 +21,46 @@ EDUCATIONAL_ATTAINMENTS = [
 EMPLOYMENT_STATUSES = ["Employed", "Unemployed", "Student", "Homemaker", "Retired", "Self-employed"]
 RELIGIONS = ["Roman Catholic", "Islam", "Iglesia ni Cristo", "Protestant", "None", "Other"]
 YES_NO = [("", "Select..."), ("yes", "Yes"), ("no", "No")]
-INCIDENT_TIME_PERIODS = ["Morning", "Afternoon", "Evening", "Night", "Unknown"]
-INCIDENT_PLACES = ["Home", "School", "Workplace", "Public place", "Health facility", "Other"]
+INCIDENT_DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+INCIDENT_TIME_PERIODS = [
+    "12am - 4am",
+    "4am - 8am",
+    "8am - 12nn",
+    "12nn - 4pm",
+    "4pm - 8pm",
+    "8pm - 12mn",
+]
+INCIDENT_PLACES = ["Patient's home", "Another person's home", "School", "Workplace", "Other"]
+LOCATION_OPTIONS = {
+    "NCR": {
+        "Metro Manila": [
+            "Caloocan",
+            "Las Pinas",
+            "Makati",
+            "Malabon",
+            "Mandaluyong",
+            "Manila",
+            "Marikina",
+            "Muntinlupa",
+            "Navotas",
+            "Paranaque",
+            "Pasay",
+            "Pasig",
+            "Pateros",
+            "Quezon City",
+            "San Juan",
+            "Taguig",
+            "Valenzuela",
+        ],
+    },
+    "Region XI": {
+        "Davao City": ["Agdao", "Buhangin", "Calinan", "Poblacion", "Talomo", "Toril"],
+        "Davao de Oro": ["Compostela", "Mawab", "Monkayo", "Nabunturan"],
+        "Davao del Norte": ["Panabo", "Samal", "Tagum"],
+        "Davao del Sur": ["Digos", "Hagonoy", "Santa Cruz"],
+        "Davao Oriental": ["Baganga", "Lupon", "Mati"],
+    },
+}
 SELF_POISONING_METHODS = [
     "X60 Nonopioid analgesics",
     "X61 Antiepileptic, sedative-hypnotic, antiparkinsonism and psychotropic drugs",

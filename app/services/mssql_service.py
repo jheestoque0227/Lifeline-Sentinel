@@ -61,3 +61,81 @@ def search_patients(keyword):
     conn.close()
 
     return results
+
+
+def search_diagnoses(keyword=""):
+    conn = get_mssql_connection()
+    cursor = conn.cursor()
+
+    query = """
+        SELECT TOP 20
+            diagcode,
+            diagdesc
+        FROM hdiag
+        WHERE
+            diagcode LIKE 'F%'
+            AND (
+                ? = ''
+                OR diagcode LIKE ?
+                OR diagdesc LIKE ?
+            )
+        ORDER BY diagcode
+    """
+
+    keyword = (keyword or "").strip()
+    search = f"%{keyword}%"
+
+    cursor.execute(
+        query,
+        keyword,
+        search,
+        search
+    )
+
+    rows = cursor.fetchall()
+
+    results = []
+    for row in rows:
+        diagnosis_code = row.diagcode
+        diagnosis_description = row.diagdesc
+        results.append({
+            "id": diagnosis_code,
+            "text": f"{diagnosis_code} - {diagnosis_description}",
+            "diagcode": diagnosis_code,
+            "diagdesc": diagnosis_description,
+        })
+
+    cursor.close()
+    conn.close()
+
+    return results
+
+
+def get_diagnosis_choice(diagnosis_code):
+    if not diagnosis_code:
+        return None
+
+    conn = get_mssql_connection()
+    cursor = conn.cursor()
+
+    query = """
+        SELECT TOP 1
+            diagcode,
+            diagdesc
+        FROM hdiag
+        WHERE diagcode = ?
+    """
+
+    cursor.execute(query, diagnosis_code)
+    row = cursor.fetchone()
+
+    cursor.close()
+    conn.close()
+
+    if not row:
+        return None
+
+    return (
+        row.diagcode,
+        f"{row.diagcode} - {row.diagdesc}",
+    )

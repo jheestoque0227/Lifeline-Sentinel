@@ -128,3 +128,16 @@ class Config:
         "INITIAL_ADMIN_PASSWORD",
         ""
     )
+
+    # =========================================
+    # Initial Hospital Configuration
+    # =========================================
+    INITIAL_HOSPITAL_CODE = _env_str(
+        "INITIAL_HOSPITAL_CODE",
+        ""
+    )
+
+    INITIAL_HOSPITAL_NAME = _env_str(
+        "INITIAL_HOSPITAL_NAME",
+        ""
+    )

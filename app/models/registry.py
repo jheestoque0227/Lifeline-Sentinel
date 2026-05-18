@@ -14,6 +14,8 @@ class Registry(db.Model):
     reporting_department = db.Column(db.Enum("ER", "OPS"), nullable=False)
     is_valid_registry_case = db.Column(db.Boolean, nullable=False, default=True)
     invalid_reason = db.Column(db.String(255), nullable=True)
+    is_first_incident = db.Column(db.Boolean, nullable=True)
+    has_past_2_month_incident = db.Column(db.Boolean, nullable=True)
 
     patient_identifier = db.Column(db.String(100), nullable=False)
     age = db.Column(db.Integer, nullable=False)
@@ -47,11 +49,12 @@ class Registry(db.Model):
         single_parent=True,
         uselist=False,
     )
-    incident_details = db.relationship(
-        "IncidentDetail",
+    incidents = db.relationship(
+        "RegistryIncident",
         backref="registry",
         cascade="all, delete-orphan",
         lazy=True,
+        order_by="RegistryIncident.id",
     )
     psychiatric_history = db.relationship(
         "PsychiatricHistory",

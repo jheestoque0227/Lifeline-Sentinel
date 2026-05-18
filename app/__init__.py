@@ -31,7 +31,7 @@ def create_app(config_class=Config):
     from .cli import register_cli
     register_cli(app)
 
-    from .models import AuditLog, CaseAscertainment, DiagnosisDisposition, IncidentDetail, PsychiatricHistory, Registry, User  # noqa: F401
+    from .models import AuditLog, CaseAscertainment, DiagnosisDisposition, IncidentDetail, PsychiatricHistory, Registry, RegistryIncidentMethod, User  # noqa: F401
 
     @app.before_request
     def manage_authenticated_session():

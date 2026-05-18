@@ -9,29 +9,53 @@ window.initRegistrySelect2 = function initRegistrySelect2(root) {
             const $dropdownParent = $field.parent();
             $dropdownParent.addClass("select2-field-parent");
 
-            $field.select2({
+            const select2Options = {
                 width: "100%",
                 dropdownAutoWidth: false,
                 dropdownParent: $dropdownParent,
                 placeholder: $field.data("placeholder") || "Select options",
                 closeOnSelect: !$field.prop("multiple"),
                 allowClear: true
-            });
+            };
+
+            if ($field.data("ajaxUrl")) {
+                select2Options.ajax = {
+                    url: $field.data("ajaxUrl"),
+                    dataType: "json",
+                    delay: 250,
+                    data: function (params) {
+                        return {
+                            q: params.term || ""
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data.results || []
+                        };
+                    },
+                    cache: true
+                };
+            }
+
+            $field.select2(select2Options);
         });
     }
 };
 
 window.initConditionalOtherFields = function initConditionalOtherFields(root) {
     const scope = root || document;
+    const isOtherValue = (value) => ["other", "others"].includes((value || "").trim().toLowerCase());
+
     scope.querySelectorAll("[data-other-trigger]").forEach((trigger) => {
         const targetId = trigger.dataset.otherTrigger;
         const target = scope.querySelector(`#${CSS.escape(targetId)}`) || document.getElementById(targetId);
         if (!target) return;
 
         const sync = () => {
-            const isOther = (trigger.value || "").trim().toLowerCase() === "other";
+            const isOther = isOtherValue(trigger.value);
             target.disabled = !isOther;
             target.required = isOther;
+            target.setAttribute("aria-disabled", isOther ? "false" : "true");
             document.querySelectorAll(`[data-required-marker-for="${target.id}"]`).forEach((marker) => {
                 marker.classList.toggle("hidden", !isOther);
             });
@@ -43,6 +67,11 @@ window.initConditionalOtherFields = function initConditionalOtherFields(root) {
         trigger.removeEventListener("change", trigger._conditionalOtherSync);
         trigger._conditionalOtherSync = sync;
         trigger.addEventListener("change", sync);
+        if (window.jQuery) {
+            window.jQuery(trigger)
+                .off(".conditionalOther")
+                .on("change.conditionalOther select2:select.conditionalOther select2:clear.conditionalOther", sync);
+        }
         sync();
     });
 };
@@ -128,11 +157,140 @@ window.scheduleDataTableRefresh = function scheduleDataTableRefresh() {
     });
 };
 
+window.initPatientSearchModal = function initPatientSearchModal(root) {
+    if (!window.jQuery || !window.jQuery.fn || !window.jQuery.fn.DataTable) return;
+
+    const scope = root || document;
+    const modal = scope.querySelector("[data-patient-search-modal]") || document.querySelector("[data-patient-search-modal]");
+    const patientIdentifier = scope.querySelector("[data-patient-search-trigger]") || document.querySelector("[data-patient-search-trigger]");
+    if (!modal || !patientIdentifier || modal.dataset.patientSearchBound === "true") return;
+
+    const searchUrl = modal.dataset.patientSearchUrl;
+    const searchInput = modal.querySelector("[data-patient-search-input]");
+    const searchButton = modal.querySelector("[data-patient-search-button]");
+    const closeButtons = modal.querySelectorAll("[data-patient-search-close]");
+    const tableElement = modal.querySelector("table.js-patient-search-table");
+    if (!searchUrl || !searchInput || !searchButton || !tableElement) return;
+
+    modal.dataset.patientSearchBound = "true";
+    const dataTableRender = window.jQuery.fn.dataTable.render;
+    const textRenderer = dataTableRender && dataTableRender.text ? dataTableRender.text() : undefined;
+
+    const patientTable = window.jQuery(tableElement).DataTable({
+        autoWidth: false,
+        data: [],
+        pageLength: 10,
+        lengthChange: false,
+        searching: false,
+        ordering: false,
+        responsive: false,
+        layout: {
+            topStart: null,
+            topEnd: null,
+            bottomStart: "info",
+            bottomEnd: "paging"
+        },
+        language: {
+            info: "Showing _START_ to _END_ of _TOTAL_ entries",
+            emptyTable: "No data available"
+        },
+        columns: [
+            { data: "hospital_number", defaultContent: "", render: textRenderer },
+            { data: "patient_name", defaultContent: "", render: textRenderer }
+        ]
+    });
+
+    const openModal = () => {
+        if (!modal.classList.contains("hidden")) return;
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+        modal.setAttribute("aria-hidden", "false");
+        searchInput.value = patientIdentifier.value || "";
+        window.setTimeout(() => {
+            searchInput.focus();
+            patientTable.columns.adjust();
+        }, 0);
+    };
+
+    const closeModal = () => {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+        modal.setAttribute("aria-hidden", "true");
+    };
+
+    const normalizeRows = (payload) => {
+        const rows = Array.isArray(payload) ? payload : payload.results || payload.patients || [];
+        return rows.map((row) => ({
+            hospital_number: row.hospital_number || row.hospitalNumber || row.hpercode || "",
+            patient_name: row.patient_name || row.patientName || row.full_name || row.name || ""
+        }));
+    };
+
+    const runSearch = () => {
+        const query = searchInput.value.trim();
+        if (!query) {
+            patientTable.clear().draw();
+            return;
+        }
+
+        searchButton.disabled = true;
+        fetch(`${searchUrl}?q=${encodeURIComponent(query)}`, {
+            headers: {
+                Accept: "application/json"
+            }
+        })
+            .then((response) => {
+                if (!response.ok) throw new Error("Patient search failed.");
+                return response.json();
+            })
+            .then((payload) => {
+                patientTable.clear().rows.add(normalizeRows(payload)).draw();
+                patientTable.columns.adjust();
+            })
+            .catch(() => {
+                patientTable.clear().draw();
+            })
+            .finally(() => {
+                searchButton.disabled = false;
+            });
+    };
+
+    patientIdentifier.addEventListener("click", openModal);
+    patientIdentifier.addEventListener("focus", openModal);
+    searchButton.addEventListener("click", runSearch);
+
+    closeButtons.forEach((button) => {
+        button.addEventListener("click", closeModal);
+    });
+
+    modal.addEventListener("click", (event) => {
+        if (event.target === modal) {
+            closeModal();
+        }
+    });
+
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && !modal.classList.contains("hidden")) {
+            closeModal();
+        }
+    });
+
+    window.jQuery(tableElement).on("click", "tbody tr", function () {
+        const row = patientTable.row(this).data();
+        if (!row || !row.hospital_number) return;
+        patientIdentifier.value = row.hospital_number;
+        patientIdentifier.dispatchEvent(new Event("input", { bubbles: true }));
+        patientIdentifier.dispatchEvent(new Event("change", { bubbles: true }));
+        closeModal();
+    });
+};
+
 document.addEventListener("DOMContentLoaded", () => {
     window.initRegistrySelect2(document);
     window.initConditionalOtherFields(document);
     window.initSubstanceTypeFields(document);
     window.initDataTables(document);
+    window.initPatientSearchModal(document);
 
     const charts = {
         caseTrend: {

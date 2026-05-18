@@ -65,12 +65,20 @@
     <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
         <h2 class="text-base font-bold text-slate-950 dark:text-white">Data Steward and Hospital Information</h2>
         <div class="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <div>{{ label(form.data_steward_code) }}{{ field_input(form.data_steward_code) }}</div>
-            <div>{{ label(form.hospital_code) }}{{ field_input(form.hospital_code) }}</div>
+            <div>
+                {{ label(form.data_steward_code) }}
+                {{ form.data_steward_code(class="mt-1 block w-full cursor-not-allowed rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-sm text-slate-500 shadow-sm focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-500", readonly=true, aria_readonly="true") }}
+                {{ errors(form.data_steward_code) }}
+            </div>
+            <div>
+                {{ label(form.hospital_code) }}
+                {{ form.hospital_code(class="mt-1 block w-full cursor-not-allowed rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-sm text-slate-500 shadow-sm focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-500", readonly=true, aria_readonly="true") }}
+                {{ errors(form.hospital_code) }}
+            </div>
             <div>{{ label(form.date_of_presentation) }}{{ field_input(form.date_of_presentation) }}</div>
             <div>{{ label(form.time_of_presentation) }}{{ field_input(form.time_of_presentation) }}</div>
-            <div>{{ label(form.reporting_department) }}{{ field_select(form.reporting_department) }}</div>
-            <div>{{ label(form.type_of_consult) }}{{ form.type_of_consult(class="js-registry-select mt-1 block w-full", data_placeholder="Select...", data_other_trigger="type_of_consult_other") }}{{ errors(form.type_of_consult) }}</div>
+            <div>{{ label(form.reporting_department) }}{{ form.reporting_department(class="js-registry-select block w-full", data_placeholder="Select...") }}{{ errors(form.reporting_department) }}</div>
+            <div>{{ label(form.type_of_consult) }}{{ form.type_of_consult(class="js-registry-select block w-full", data_placeholder="Select...", data_other_trigger="type_of_consult_other") }}{{ errors(form.type_of_consult) }}</div>
             <div>{{ label(form.type_of_consult_other, "type_of_consult_other") }}{{ form.type_of_consult_other(class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-sentinel-600 focus:outline-none focus:ring-2 focus:ring-sentinel-600/20 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:disabled:bg-slate-900 dark:disabled:text-slate-600", data_other_field="true") }}{{ errors(form.type_of_consult_other) }}</div>
         </div>
     </section>
@@ -78,41 +86,125 @@
     <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
         <h2 class="text-base font-bold text-slate-950 dark:text-white">Patient Details</h2>
         <div class="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <div>{{ label(form.patient_identifier) }}{{ field_input(form.patient_identifier) }}</div>
+            <div>
+                {{ label(form.patient_identifier) }}
+                {{ form.patient_identifier(class="mt-1 block w-full cursor-pointer rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-sentinel-600 focus:outline-none focus:ring-2 focus:ring-sentinel-600/20 dark:border-slate-700 dark:bg-slate-950 dark:text-white", data_patient_search_trigger="true", autocomplete="off", placeholder="Click to search patient") }}
+                {{ errors(form.patient_identifier) }}
+            </div>
             <div>{{ label(form.age) }}{{ field_input(form.age) }}</div>
-            <div>{{ label(form.sex_at_birth) }}{{ field_select(form.sex_at_birth) }}</div>
-            <div>{{ label(form.marital_status) }}{{ field_select(form.marital_status) }}</div>
-            <div>{{ label(form.sexual_orientation) }}{{ form.sexual_orientation(class="js-registry-select mt-1 block w-full", data_placeholder="Select...", data_other_trigger="sexual_orientation_other") }}{{ errors(form.sexual_orientation) }}</div>
+            <div>{{ label(form.sex_at_birth) }}{{ form.sex_at_birth(class="js-registry-select block w-full", data_placeholder="Select...") }}{{ errors(form.sex_at_birth) }}</div>
+            <div>{{ label(form.marital_status) }}{{ form.marital_status(class="js-registry-select block w-full", data_placeholder="Select...") }}{{ errors(form.marital_status) }}</div>
+            <div>{{ label(form.sexual_orientation) }}{{ form.sexual_orientation(class="js-registry-select block w-full", data_placeholder="Select...", data_other_trigger="sexual_orientation_other") }}{{ errors(form.sexual_orientation) }}</div>
             <div>{{ label(form.sexual_orientation_other, "sexual_orientation_other") }}{{ form.sexual_orientation_other(class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-sentinel-600 focus:outline-none focus:ring-2 focus:ring-sentinel-600/20 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:disabled:bg-slate-900 dark:disabled:text-slate-600", data_other_field="true") }}{{ errors(form.sexual_orientation_other) }}</div>
-            <div>{{ label(form.gender_identity) }}{{ form.gender_identity(class="js-registry-select mt-1 block w-full", data_placeholder="Select...", data_other_trigger="gender_identity_other") }}{{ errors(form.gender_identity) }}</div>
+            <div>{{ label(form.gender_identity) }}{{ form.gender_identity(class="js-registry-select block w-full", data_placeholder="Select...", data_other_trigger="gender_identity_other") }}{{ errors(form.gender_identity) }}</div>
             <div>{{ label(form.gender_identity_other, "gender_identity_other") }}{{ form.gender_identity_other(class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-sentinel-600 focus:outline-none focus:ring-2 focus:ring-sentinel-600/20 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:disabled:bg-slate-900 dark:disabled:text-slate-600", data_other_field="true") }}{{ errors(form.gender_identity_other) }}</div>
-            <div>{{ label(form.highest_educational_attainment) }}{{ field_select(form.highest_educational_attainment) }}</div>
-            <div>{{ label(form.employment_status) }}{{ field_select(form.employment_status) }}</div>
+            <div>{{ label(form.highest_educational_attainment) }}{{ form.highest_educational_attainment(class="js-registry-select block w-full", data_placeholder="Select...") }}{{ errors(form.highest_educational_attainment) }}</div>
+            <div>{{ label(form.employment_status) }}{{ form.employment_status(class="js-registry-select block w-full", data_placeholder="Select...") }}{{ errors(form.employment_status) }}</div>
             <div>{{ label(form.nationality) }}{{ field_input(form.nationality) }}</div>
-            <div>{{ label(form.religion) }}{{ form.religion(class="js-registry-select mt-1 block w-full", data_placeholder="Select...", data_other_trigger="religion_other") }}{{ errors(form.religion) }}</div>
+            <div>{{ label(form.religion) }}{{ form.religion(class="js-registry-select block w-full", data_placeholder="Select...", data_other_trigger="religion_other") }}{{ errors(form.religion) }}</div>
             <div>{{ label(form.religion_other, "religion_other") }}{{ form.religion_other(class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-sentinel-600 focus:outline-none focus:ring-2 focus:ring-sentinel-600/20 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:disabled:bg-slate-900 dark:disabled:text-slate-600", data_other_field="true") }}{{ errors(form.religion_other) }}</div>
         </div>
     </section>
 
     <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
         <h2 class="text-base font-bold text-slate-950 dark:text-white">Incident Details</h2>
-        <div class="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <div>{{ label(form.is_first_incident) }}{{ field_select(form.is_first_incident) }}</div>
-            <div>{{ label(form.has_past_2_month_incident) }}{{ field_select(form.has_past_2_month_incident) }}</div>
-            <div>{{ label(form.incident_date) }}{{ field_input(form.incident_date) }}</div>
-            <div>{{ label(form.incident_day) }}{{ field_input(form.incident_day) }}</div>
-            <div>{{ label(form.incident_time_period) }}{{ field_select(form.incident_time_period) }}</div>
-            <div>{{ label(form.incident_place) }}{{ form.incident_place(class="js-registry-select mt-1 block w-full", data_placeholder="Select...", data_other_trigger="incident_place_other") }}{{ errors(form.incident_place) }}</div>
-            <div>{{ label(form.incident_place_other, "incident_place_other") }}{{ form.incident_place_other(class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-sentinel-600 focus:outline-none focus:ring-2 focus:ring-sentinel-600/20 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:disabled:bg-slate-900 dark:disabled:text-slate-600", data_other_field="true") }}{{ errors(form.incident_place_other) }}</div>
-            <div>{{ label(form.incident_region) }}{{ field_input(form.incident_region) }}</div>
-            <div>{{ label(form.incident_province_city) }}{{ field_input(form.incident_province_city) }}</div>
-            <div>{{ label(form.incident_municipality) }}{{ field_input(form.incident_municipality) }}</div>
+        <div class="mt-4 grid gap-4">
+            <div class="w-full">{{ label(form.is_first_incident) }}{{ form.is_first_incident(class="js-registry-select block w-full", data_placeholder="Select...") }}{{ errors(form.is_first_incident) }}</div>
         </div>
-        <div class="mt-4 grid min-w-0 gap-4 lg:grid-cols-2">
-            <div class="min-w-0">{{ label(form.self_poisoning_methods) }}{{ field_multi(form.self_poisoning_methods) }}</div>
-            <div class="min-w-0">{{ label(form.self_harm_methods) }}{{ field_multi(form.self_harm_methods) }}</div>
+        <div id="incident-list" class="mt-5 space-y-4">
+            {% for incident in incidents|default([{}]) %}
+            {% set idx = loop.index0 %}
+            {% set poisoning_selected = incident.self_poisoning_methods|default([]) %}
+            {% set harm_selected = incident.self_harm_methods|default([]) %}
+            {% set method_notes = incident.method_notes|default({}) %}
+            <div class="incident-card rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/40" data-incident-card data-incident-index="{{ idx }}">
+                <input type="hidden" name="incidents[{{ idx }}][remove]" value="0" data-incident-remove>
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <h3 class="text-sm font-bold text-slate-950 dark:text-white" data-incident-title>Incident #{{ loop.index }}</h3>
+                </div>
+                <div class="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                    <div>
+                        <label class="text-sm font-semibold text-slate-700 dark:text-slate-200">Date of incident <span class="required-asterisk" aria-hidden="true">*</span></label>
+                        <input type="date" name="incidents[{{ idx }}][incident_date]" value="{{ incident.incident_date|default('') }}" class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-sentinel-600 focus:outline-none focus:ring-2 focus:ring-sentinel-600/20 dark:border-slate-700 dark:bg-slate-950 dark:text-white" required>
+                    </div>
+                    <div>
+                        <label class="text-sm font-semibold text-slate-700 dark:text-slate-200">Day of incident <span class="required-asterisk" aria-hidden="true">*</span></label>
+                        <select name="incidents[{{ idx }}][incident_day]" class="js-registry-select block w-full" data-placeholder="Select..." required>
+                            <option value="">Select...</option>
+                            {% for day in options.INCIDENT_DAYS %}<option value="{{ day }}" {% if incident.incident_day == day %}selected{% endif %}>{{ day }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-sm font-semibold text-slate-700 dark:text-slate-200">Time of day <span class="required-asterisk" aria-hidden="true">*</span></label>
+                        <select name="incidents[{{ idx }}][incident_time_range]" class="js-registry-select block w-full" data-placeholder="Select..." required>
+                            <option value="">Select...</option>
+                            {% for period in options.INCIDENT_TIME_PERIODS %}<option value="{{ period }}" {% if incident.incident_time_range == period %}selected{% endif %}>{{ period }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-sm font-semibold text-slate-700 dark:text-slate-200">Place of incident <span class="required-asterisk" aria-hidden="true">*</span></label>
+                        <select name="incidents[{{ idx }}][incident_place]" class="js-registry-select block w-full" data-placeholder="Select..." data-other-trigger="incident_place_other_{{ idx }}" required>
+                            <option value="">Select...</option>
+                            {% for place in options.INCIDENT_PLACES %}<option value="{{ place }}" {% if incident.incident_place == place %}selected{% endif %}>{{ place }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-sm font-semibold text-slate-700 dark:text-slate-200" for="incident_place_other_{{ idx }}">Other incident place <span class="required-asterisk hidden" data-required-marker-for="incident_place_other_{{ idx }}" aria-hidden="true">*</span></label>
+                        <input id="incident_place_other_{{ idx }}" type="text" name="incidents[{{ idx }}][incident_place_other]" value="{{ incident.incident_place_other|default('') }}" class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-sentinel-600 focus:outline-none focus:ring-2 focus:ring-sentinel-600/20 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white" data-other-field="true" placeholder="Please specify">
+                    </div>
+                    <div>
+                        <label class="text-sm font-semibold text-slate-700 dark:text-slate-200">Region <span class="required-asterisk" aria-hidden="true">*</span></label>
+                        <select name="incidents[{{ idx }}][incident_region]" class="js-registry-select block w-full" data-placeholder="Select..." data-location-region data-provinces-url="{{ url_for('registry.location_provinces') }}" required>
+                            <option value="">Select...</option>
+                            {% for region in location_regions|default([]) %}<option value="{{ region.id }}" {% if incident.incident_region == region.id %}selected{% endif %}>{{ region.text }}</option>{% endfor %}
+                            {% if incident.incident_region and incident.incident_region not in (location_regions|default([])|map(attribute="id")|list) %}<option value="{{ incident.incident_region }}" selected>{{ incident.incident_region }}</option>{% endif %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-sm font-semibold text-slate-700 dark:text-slate-200">Province <span class="required-asterisk" aria-hidden="true">*</span></label>
+                        <select name="incidents[{{ idx }}][province_or_city]" class="js-registry-select block w-full" data-placeholder="Select..." data-location-province data-cities-url="{{ url_for('registry.location_cities_municipalities') }}" data-selected-value="{{ incident.province_or_city|default('') }}" required><option value="">Select...</option></select>
+                    </div>
+                    <div>
+                        <label class="text-sm font-semibold text-slate-700 dark:text-slate-200">City / Municipality <span class="required-asterisk" aria-hidden="true">*</span></label>
+                        <select name="incidents[{{ idx }}][municipality]" class="js-registry-select block w-full" data-placeholder="Select..." data-location-municipality data-selected-value="{{ incident.municipality|default('') }}" required><option value="">Select...</option></select>
+                    </div>
+                </div>
+                <div class="mt-4 grid gap-4 lg:grid-cols-2">
+                    {% for category, field_name, choices, selected in [
+                        ("Self-poisoning methods (X60-X69)", "self_poisoning_methods", options.SELF_POISONING_METHODS, poisoning_selected),
+                        ("Self-harm methods (X70-X84)", "self_harm_methods", options.SELF_HARM_METHODS, harm_selected)
+                    ] %}
+                    <div class="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+                        <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">{{ category }}</p>
+                        <div class="mt-3 space-y-3">
+                            {% for method in choices %}
+                            <label class="method-checkbox-row text-sm text-slate-700 dark:text-slate-200">
+                                <input type="checkbox" name="incidents[{{ idx }}][{{ field_name }}]" value="{{ method }}" {% if method in selected %}checked{% endif %} class="registry-checkbox mt-1 rounded border-slate-300 text-sentinel-600 focus:ring-sentinel-600" data-method-checkbox>
+                                <span>{{ method }}</span>
+                            </label>
+                            <div class="{% if method not in selected %}hidden {% endif %}pl-6" data-method-note-value="{{ method }}">
+                                <input type="text" name="incidents[{{ idx }}][method_notes][{{ method }}]" value="{{ method_notes.get(method, '') }}" class="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-sentinel-600 focus:outline-none focus:ring-2 focus:ring-sentinel-600/20 dark:border-slate-700 dark:bg-slate-950 dark:text-white" placeholder="Please specify">
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="mt-4">
+                    <label class="text-sm font-semibold text-slate-700 dark:text-slate-200">Incident remarks</label>
+                    <textarea name="incidents[{{ idx }}][remarks]" class="mt-1 block min-h-24 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-sentinel-600 focus:outline-none focus:ring-2 focus:ring-sentinel-600/20 dark:border-slate-700 dark:bg-slate-950 dark:text-white">{{ incident.remarks|default('') }}</textarea>
+                </div>
+            </div>
+            {% if loop.first %}
+            <div class="grid gap-4">
+                <div class="w-full" data-past-incident-question>
+                    {{ label(form.has_past_2_month_incident) }}
+                    {{ form.has_past_2_month_incident(class="js-registry-select block w-full", data_placeholder="Select...") }}{{ errors(form.has_past_2_month_incident) }}
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
         </div>
-        <div class="mt-4">{{ label(form.incident_remarks) }}{{ field_input(form.incident_remarks, "min-h-28") }}</div>
     </section>
 
     <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
@@ -189,8 +281,16 @@
     <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
         <h2 class="text-base font-bold text-slate-950 dark:text-white">Diagnosis and Disposition</h2>
         <div class="mt-4 grid gap-4 md:grid-cols-2">
-            <div>{{ label(form.primary_diagnosis_code) }}{{ field_select(form.primary_diagnosis_code) }}</div>
-            <div>{{ label(form.secondary_diagnosis_code) }}{{ field_select(form.secondary_diagnosis_code) }}</div>
+            <div>
+                {{ label(form.primary_diagnosis_code) }}
+                {{ form.primary_diagnosis_code(class="js-registry-select mt-1 block w-full", data_placeholder="Search ICD-10 F code...", data_ajax_url=url_for("registry.diagnosis_search")) }}
+                {{ errors(form.primary_diagnosis_code) }}
+            </div>
+            <div>
+                {{ label(form.secondary_diagnosis_code) }}
+                {{ form.secondary_diagnosis_code(class="js-registry-select mt-1 block w-full", data_placeholder="Search ICD-10 F code...", data_ajax_url=url_for("registry.diagnosis_search")) }}
+                {{ errors(form.secondary_diagnosis_code) }}
+            </div>
             <div>{{ label(form.disposition) }}{{ form.disposition(class="js-registry-select mt-1 block w-full", data_placeholder="Select...", data_other_trigger="disposition_other") }}{{ errors(form.disposition) }}</div>
             <div>{{ label(form.disposition_other, "disposition_other") }}{{ form.disposition_other(class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-sentinel-600 focus:outline-none focus:ring-2 focus:ring-sentinel-600/20 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:disabled:bg-slate-900 dark:disabled:text-slate-600", data_other_field="true") }}{{ errors(form.disposition_other) }}</div>
         </div>
@@ -203,14 +303,50 @@
     </div>
 </form>
 
+<div class="patient-search-modal fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/60 px-4 py-6" data-patient-search-modal data-patient-search-url="{{ url_for('registry.patient_search') }}" aria-hidden="true">
+    <div class="w-full max-w-3xl rounded-lg bg-white shadow-soft dark:bg-slate-900" role="dialog" aria-modal="true" aria-labelledby="patient-search-title">
+        <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4 dark:border-slate-800">
+            <div>
+                <h2 id="patient-search-title" class="text-base font-bold text-slate-950 dark:text-white">Search Patient</h2>
+                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Search by hospital number or patient name.</p>
+            </div>
+            <button type="button" class="btn-icon" data-patient-search-close aria-label="Close patient search">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="space-y-4 p-5">
+            <div class="flex flex-col gap-3 sm:flex-row">
+                <input type="search" class="patient-search-input min-h-11 flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-sentinel-600 focus:outline-none focus:ring-2 focus:ring-sentinel-600/20 dark:border-slate-700 dark:bg-slate-950 dark:text-white" data-patient-search-input placeholder="Search hospital number or patient name" autocomplete="off">
+                <button type="button" class="btn btn-primary" data-patient-search-button>Search</button>
+            </div>
+            <div class="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-800">
+                <table class="js-patient-search-table min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800">
+                    <thead class="bg-slate-50 dark:bg-slate-950">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">Hospital Number</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">Patient Name</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Click a row to use that patient hospital number.</p>
+        </div>
+    </div>
+</div>
+
 <script>
     (function () {
+        function isOtherValue(value) {
+            return ["other", "others"].indexOf((value || "").trim().toLowerCase()) >= 0;
+        }
+
         function syncConditionalOtherFields(root) {
             (root || document).querySelectorAll("[data-other-trigger]").forEach(function (trigger) {
                 var target = document.getElementById(trigger.dataset.otherTrigger);
                 if (!target) return;
 
-                var isOther = (trigger.value || "").trim().toLowerCase() === "other";
+                var isOther = isOtherValue(trigger.value);
                 target.disabled = !isOther;
                 target.required = isOther;
                 target.setAttribute("aria-disabled", isOther ? "false" : "true");
@@ -230,6 +366,13 @@
                 trigger.addEventListener("change", function () {
                     syncConditionalOtherFields(root || document);
                 });
+                if (window.jQuery) {
+                    window.jQuery(trigger)
+                        .off(".registryOther")
+                        .on("change.registryOther select2:select.registryOther select2:clear.registryOther", function () {
+                            syncConditionalOtherFields(document);
+                        });
+                }
             });
             syncConditionalOtherFields(root || document);
         }
@@ -262,9 +405,207 @@
             syncSubstanceTypeFields(root || document);
         }
 
+        function setSelectOptions(select, values, selectedValue) {
+            if (!select) return;
+            var placeholder = select.querySelector("option[value='']") ? select.querySelector("option[value='']").textContent : "Select...";
+            select.innerHTML = "";
+            var blank = document.createElement("option");
+            blank.value = "";
+            blank.textContent = placeholder || "Select...";
+            select.appendChild(blank);
+            values.forEach(function (item) {
+                var value = typeof item === "string" ? item : item.id;
+                var text = typeof item === "string" ? item : item.text;
+                var option = document.createElement("option");
+                option.value = value;
+                option.textContent = text || value;
+                if (value === selectedValue) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+            if (selectedValue && !Array.prototype.some.call(select.options, function (option) { return option.value === selectedValue; })) {
+                var selectedOption = document.createElement("option");
+                selectedOption.value = selectedValue;
+                selectedOption.textContent = selectedValue;
+                selectedOption.selected = true;
+                select.appendChild(selectedOption);
+            }
+            if (window.jQuery && window.jQuery.fn && window.jQuery.fn.select2) {
+                window.jQuery(select).trigger("change.select2");
+            }
+        }
+
+        function fetchLocationOptions(url, params) {
+            if (!url) return Promise.resolve([]);
+            var query = new URLSearchParams(params || {});
+            return fetch(url + "?" + query.toString(), { headers: { Accept: "application/json" } })
+                .then(function (response) {
+                    if (!response.ok) throw new Error("Location lookup failed.");
+                    return response.json();
+                })
+                .then(function (payload) {
+                    return payload.results || [];
+                })
+                .catch(function () {
+                    return [];
+                });
+        }
+
+        function bindIncidentLocationFields(root) {
+            (root || document).querySelectorAll("[data-incident-card]").forEach(function (card) {
+                var region = card.querySelector("[data-location-region]");
+                var province = card.querySelector("[data-location-province]");
+                var municipality = card.querySelector("[data-location-municipality]");
+                if (!region || !province || !municipality || region.dataset.locationBound === "true") return;
+
+                var syncProvince = function (preserveSelected) {
+                    var provinceValue = preserveSelected ? (province.dataset.selectedValue || province.value || "") : "";
+                    setSelectOptions(province, [], provinceValue);
+                    setSelectOptions(municipality, [], preserveSelected ? (municipality.dataset.selectedValue || municipality.value || "") : "");
+                    fetchLocationOptions(region.dataset.provincesUrl, { region: region.value }).then(function (provinceOptions) {
+                        var selectedProvince = provinceOptions.some(function (item) { return item.id === provinceValue; }) ? provinceValue : "";
+                        if (!selectedProvince && provinceOptions.length === 1) {
+                            selectedProvince = provinceOptions[0].id;
+                        }
+                        setSelectOptions(province, provinceOptions, selectedProvince);
+                        province.dataset.selectedValue = "";
+                        syncMunicipality(!!selectedProvince && preserveSelected);
+                    });
+                };
+                var syncMunicipality = function (preserveSelected) {
+                    var municipalityValue = preserveSelected ? (municipality.dataset.selectedValue || municipality.value || "") : "";
+                    setSelectOptions(municipality, [], municipalityValue);
+                    fetchLocationOptions(province.dataset.citiesUrl, { province: province.value }).then(function (municipalityOptions) {
+                        var selectedMunicipality = municipalityOptions.some(function (item) { return item.id === municipalityValue; }) ? municipalityValue : "";
+                        setSelectOptions(municipality, municipalityOptions, selectedMunicipality);
+                        municipality.dataset.selectedValue = "";
+                    });
+                };
+
+                var syncProvinceFromUserChange = function () {
+                    province.dataset.selectedValue = "";
+                    municipality.dataset.selectedValue = "";
+                    syncProvince(false);
+                };
+                var syncMunicipalityFromUserChange = function () {
+                    municipality.dataset.selectedValue = "";
+                    syncMunicipality(false);
+                };
+
+                region.dataset.locationBound = "true";
+                region.addEventListener("change", syncProvinceFromUserChange);
+                province.addEventListener("change", syncMunicipalityFromUserChange);
+                if (window.jQuery) {
+                    window.jQuery(region).on("select2:select select2:clear", syncProvinceFromUserChange);
+                    window.jQuery(province).on("select2:select select2:clear", syncMunicipalityFromUserChange);
+                }
+                syncProvince(true);
+            });
+        }
+
+        function syncMethodNote(checkbox) {
+            var card = checkbox.closest("[data-incident-card]");
+            if (!card) return;
+            var note = card.querySelector('[data-method-note-value="' + checkbox.value.replace(/"/g, '\\"') + '"]');
+            if (!note) return;
+            note.classList.toggle("hidden", !checkbox.checked);
+            if (!checkbox.checked) {
+                note.querySelectorAll("input").forEach(function (input) {
+                    input.value = "";
+                });
+            }
+        }
+
+        function bindMethodNotes(root) {
+            (root || document).querySelectorAll("[data-method-checkbox]").forEach(function (checkbox) {
+                if (checkbox.dataset.methodNotesBound !== "true") {
+                    checkbox.dataset.methodNotesBound = "true";
+                    checkbox.addEventListener("change", function () {
+                        syncMethodNote(checkbox);
+                    });
+                }
+                syncMethodNote(checkbox);
+            });
+        }
+
+        function setIncidentCardEnabled(card, enabled) {
+            if (!card) return;
+            if (enabled) {
+                card.style.display = "";
+                card.classList.remove("hidden");
+                card.removeAttribute("hidden");
+            } else {
+                card.style.display = "none";
+                card.classList.add("hidden");
+                card.setAttribute("hidden", "hidden");
+            }
+            card.querySelectorAll("input, select, textarea").forEach(function (field) {
+                if (field.dataset.incidentRemove) {
+                    field.disabled = false;
+                    field.value = enabled ? "0" : "1";
+                    return;
+                }
+                field.disabled = !enabled;
+            });
+            if (window.jQuery && window.jQuery.fn && window.jQuery.fn.select2) {
+                window.jQuery(card).find("select.js-registry-select").trigger("change.select2");
+            }
+            syncConditionalOtherFields(card);
+        }
+
+        function syncIncidentVisibility(root) {
+            var scope = root || document;
+            var firstQuestion = scope.querySelector("#is_first_incident") || document.getElementById("is_first_incident");
+            var pastQuestion = scope.querySelector("#has_past_2_month_incident") || document.getElementById("has_past_2_month_incident");
+            var pastQuestionBlock = scope.querySelector("[data-past-incident-question]") || document.querySelector("[data-past-incident-question]");
+            var firstCard = scope.querySelector('[data-incident-card][data-incident-index="0"]') || document.querySelector('[data-incident-card][data-incident-index="0"]');
+            var secondCard = scope.querySelector('[data-incident-card][data-incident-index="1"]') || document.querySelector('[data-incident-card][data-incident-index="1"]');
+            var showFirst = !!(firstQuestion && firstQuestion.value);
+            var showSecond = !!(pastQuestion && pastQuestion.value === "yes");
+
+            setIncidentCardEnabled(firstCard, showFirst);
+            if (pastQuestionBlock) {
+                pastQuestionBlock.style.display = "";
+                pastQuestionBlock.classList.remove("hidden");
+                pastQuestionBlock.removeAttribute("hidden");
+                pastQuestionBlock.querySelectorAll("select").forEach(function (field) {
+                    field.disabled = false;
+                });
+            }
+            setIncidentCardEnabled(secondCard, showSecond);
+        }
+
+        function bindIncidentTriggers(root) {
+            var scope = root || document;
+            ["#is_first_incident", "#has_past_2_month_incident"].forEach(function (selector) {
+                var field = scope.querySelector(selector) || document.querySelector(selector);
+                if (!field || field.dataset.incidentTriggerBound === "true") return;
+                field.dataset.incidentTriggerBound = "true";
+                field.addEventListener("change", function () {
+                    syncIncidentVisibility(document);
+                });
+                if (window.jQuery) {
+                    window.jQuery(field).on("change.select2 select2:select select2:clear", function () {
+                        syncIncidentVisibility(document);
+                    });
+                }
+            });
+            syncIncidentVisibility(scope);
+        }
+
+        document.addEventListener("change", function (event) {
+            if (event.target && (event.target.id === "is_first_incident" || event.target.id === "has_past_2_month_incident")) {
+                syncIncidentVisibility(document);
+            }
+        });
+
         window.bindRegistryConditionalOtherFields = function (root) {
             bindConditionalOtherFields(root);
             bindSubstanceTypeFields(root);
+            bindIncidentLocationFields(root);
+            bindMethodNotes(root);
+            bindIncidentTriggers(root);
         };
 
         window.rebuildRegistrySelect2 = function (root) {
@@ -277,15 +618,27 @@
             document.addEventListener("DOMContentLoaded", function () {
                 bindConditionalOtherFields(document);
                 bindSubstanceTypeFields(document);
+                bindIncidentLocationFields(document);
+                bindMethodNotes(document);
+                bindIncidentTriggers(document);
                 window.setTimeout(function () {
                     window.rebuildRegistrySelect2(document);
+                    bindConditionalOtherFields(document);
+                    bindMethodNotes(document);
+                    syncIncidentVisibility(document);
                 }, 0);
             });
         } else {
             bindConditionalOtherFields(document);
             bindSubstanceTypeFields(document);
+            bindIncidentLocationFields(document);
+            bindMethodNotes(document);
+            bindIncidentTriggers(document);
             window.setTimeout(function () {
                 window.rebuildRegistrySelect2(document);
+                bindConditionalOtherFields(document);
+                bindMethodNotes(document);
+                syncIncidentVisibility(document);
             }, 0);
         }
     })();

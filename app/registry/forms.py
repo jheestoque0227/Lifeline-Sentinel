@@ -43,16 +43,16 @@ class RegistryForm(FlaskForm):
     religion = SelectField("Religion", choices=options.as_choices(options.RELIGIONS), validators=[DataRequired(REQUIRED_MESSAGE)])
     religion_other = StringField("Other religion", validators=[Length(max=150)])
 
-    is_first_incident = SelectField("First incident", choices=options.YES_NO, validators=[DataRequired(REQUIRED_MESSAGE)])
-    has_past_2_month_incident = SelectField("Past 2-month incident", choices=options.YES_NO, validators=[Optional()])
-    incident_date = DateField("Incident date", validators=[Optional()])
-    incident_day = StringField("Incident day", validators=[Optional(), Length(max=20)])
-    incident_time_period = SelectField("Incident time period", choices=options.as_choices(options.INCIDENT_TIME_PERIODS), validators=[Optional()])
-    incident_place = SelectField("Incident place", choices=options.as_choices(options.INCIDENT_PLACES), validators=[Optional()])
+    is_first_incident = SelectField("Is this the first incident of suicide attempt or self-harm?", choices=options.YES_NO, validators=[DataRequired(REQUIRED_MESSAGE)])
+    has_past_2_month_incident = SelectField("Was there an incident of suicide attempt or self-harm in the past 2 months?", choices=options.YES_NO, validators=[Optional()])
+    incident_date = DateField("(INCIDENT) Date of incident", validators=[Optional()])
+    incident_day = SelectField("(INCIDENT) Day of incident", choices=options.as_choices(options.INCIDENT_DAYS), validators=[Optional()])
+    incident_time_period = SelectField("(INCIDENT) Time of day of the incident", choices=options.as_choices(options.INCIDENT_TIME_PERIODS), validators=[Optional()])
+    incident_place = SelectField("(INCIDENT) Place of incident", choices=options.as_choices(options.INCIDENT_PLACES), validators=[Optional()])
     incident_place_other = StringField("Other incident place", validators=[Length(max=150)])
-    incident_region = StringField("Region", validators=[Optional(), Length(max=100)])
-    incident_province_city = StringField("Province/city", validators=[Optional(), Length(max=100)])
-    incident_municipality = StringField("Municipality", validators=[Optional(), Length(max=100)])
+    incident_region = SelectField("Region", choices=options.as_choices(list(options.LOCATION_OPTIONS.keys())), validators=[Optional()])
+    incident_province_city = SelectField("Province", choices=[("", "Select...")], validators=[Optional()], validate_choice=False)
+    incident_municipality = SelectField("City / Municipality", choices=[("", "Select...")], validators=[Optional()], validate_choice=False)
     self_poisoning_methods = SelectMultipleField("Self-poisoning methods (X60-X69)", choices=[(v, v) for v in options.SELF_POISONING_METHODS], validators=[Optional()])
     self_harm_methods = SelectMultipleField("Self-harm methods (X70-X84)", choices=[(v, v) for v in options.SELF_HARM_METHODS], validators=[Optional()])
     incident_remarks = TextAreaField("Incident remarks", validators=[Optional()])
@@ -87,9 +87,18 @@ class RegistryForm(FlaskForm):
     prescription_drugs_type = StringField("Prescription drugs type", validators=[Length(max=150)])
     substance_notes = TextAreaField("Substance notes", validators=[Optional()])
 
-    primary_diagnosis_code = SelectField("Primary mental health diagnosis, if any", choices=[("", "Select ICD-10 F code...")] + options.MENTAL_HEALTH_ICD10_CODES, validators=[Optional()])
-    secondary_diagnosis_code = SelectField("Secondary mental health diagnosis, if any", choices=[("", "Select ICD-10 F code...")] + options.MENTAL_HEALTH_ICD10_CODES, validators=[Optional()])
-    risk_level = HiddenField(default="Low")
+    primary_diagnosis_code = SelectField(
+        "Primary mental health diagnosis, if any",
+        choices=[("", "Select ICD-10 F code...")],
+        validators=[Optional()],
+        validate_choice=False,
+    )
+    secondary_diagnosis_code = SelectField(
+        "Secondary mental health diagnosis, if any",
+        choices=[("", "Select ICD-10 F code...")],
+        validators=[Optional()],
+        validate_choice=False,
+    )
     disposition = SelectField("Disposition", choices=options.as_choices(options.DISPOSITIONS), validators=[Optional()])
     disposition_other = StringField("Other disposition", validators=[Length(max=150)])
     diagnosis_remarks = TextAreaField("Diagnosis/disposition remarks", validators=[Optional()])
@@ -151,7 +160,6 @@ def _validate_checked_substance(selected_substances, substance, field):
 
 class RegistrySearchForm(FlaskForm):
     q = StringField("Search", validators=[Optional(), Length(max=100)])
-    risk_level = SelectField("Risk level", choices=[("", "All risk levels")] + options.RISK_LEVELS, validators=[Optional()])
     reporting_department = SelectField("Department", choices=[("", "All departments")] + options.REPORTING_DEPARTMENTS, validators=[Optional()])
     include_deleted = HiddenField(default="")
     submit = SubmitField("Search")

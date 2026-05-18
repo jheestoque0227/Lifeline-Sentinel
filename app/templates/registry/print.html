@@ -18,7 +18,6 @@
     </style>
 </head>
 <body>
-{% set incident = registry.incident_details[0] if registry.incident_details else none %}
 {% macro item(label, value) %}
 <div>
     <div class="label">{{ label }}</div>
@@ -63,15 +62,26 @@
 
 <h2>Incident Details</h2>
 <div class="grid">
-    {{ item("First incident", "Yes" if incident and incident.is_first_incident else "No" if incident else none) }}
-    {{ item("Past 2-month incident", "Yes" if incident and incident.has_past_2_month_incident else "No" if incident and incident.has_past_2_month_incident is not none else none) }}
-    {{ item("Incident date", incident.incident_date.strftime("%Y-%m-%d") if incident and incident.incident_date else none) }}
-    {{ item("Time period", incident.incident_time_period if incident else none) }}
-    {{ item("Place", incident.incident_place if incident else none) }}
-    {{ item("Self-poisoning methods", (incident.self_poisoning_methods or [])|join(", ") if incident else none) }}
-    {{ item("Self-harm methods", (incident.self_harm_methods or [])|join(", ") if incident else none) }}
-    {{ item("Remarks", incident.remarks if incident else none) }}
+    {{ item("First incident", "Yes" if registry.is_first_incident else "No" if registry.is_first_incident is not none else none) }}
+    {{ item("Past 2-month incident", "Yes" if registry.has_past_2_month_incident else "No" if registry.has_past_2_month_incident is not none else none) }}
 </div>
+{% for incident in registry.incidents %}
+<h2>Incident #{{ loop.index }}</h2>
+<div class="grid">
+    {{ item("Incident date", incident.incident_date.strftime("%Y-%m-%d") if incident.incident_date else none) }}
+    {{ item("Day", incident.incident_day) }}
+    {{ item("Time period", incident.incident_time_range) }}
+    {{ item("Place", incident.incident_place) }}
+    {{ item("Other place", incident.incident_place_other) }}
+    {{ item("Location", ((incident.incident_region or "") ~ " " ~ (incident.province_or_city or "") ~ " " ~ (incident.municipality or "")).strip()) }}
+    {{ item("Remarks", incident.remarks) }}
+</div>
+<div class="grid">
+    {% for method in incident.methods %}
+        {{ item(method.method_category ~ " " ~ method.icd10_code, method.method_description ~ (" - " ~ method.specify_notes if method.specify_notes else "")) }}
+    {% endfor %}
+</div>
+{% endfor %}
 
 <h2>Psychiatric History</h2>
 <div class="grid">
@@ -88,7 +98,6 @@
 <div class="grid">
     {{ item("Primary ICD-10", registry.diagnosis_disposition.primary_diagnosis_code if registry.diagnosis_disposition else none) }}
     {{ item("Secondary ICD-10", registry.diagnosis_disposition.secondary_diagnosis_code if registry.diagnosis_disposition else none) }}
-    {{ item("Risk level", registry.risk_level) }}
     {{ item("Disposition", registry.diagnosis_disposition.disposition if registry.diagnosis_disposition else none) }}
     {{ item("Remarks", registry.diagnosis_disposition.remarks if registry.diagnosis_disposition else none) }}
 </div>
