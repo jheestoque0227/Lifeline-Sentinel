@@ -1,21 +1,125 @@
 {% extends "layouts/base.html" %}
-{% import "components/cards.html" as cards %}
-{% block page_title %}Reports{% endblock %}
+{% block title %}Reports{% endblock %}
 {% block content %}
 <div class="space-y-6">
-    <div>
-        <p class="text-sm font-semibold uppercase tracking-wide text-sentinel-600 dark:text-sentinel-100">Reports</p>
-        <h2 class="mt-1 text-2xl font-bold tracking-tight text-slate-950 dark:text-white">Reporting Center</h2>
-        <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">PDF, Excel, and printable outputs for authorized analytics users.</p>
+    <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+            <p class="text-sm font-semibold uppercase tracking-wide text-sentinel-600 dark:text-sentinel-100">Reports</p>
+            <h1 class="mt-1 text-2xl font-bold tracking-tight text-slate-950 dark:text-white">Reporting and Exports</h1>
+            <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Registry reports are scoped to your authorized records and facility access.</p>
+        </div>
+        {% if report %}
+        <div class="flex flex-wrap gap-2">
+            {% set export_args = request.args.to_dict() %}
+            {% set _ = export_args.pop('generated', None) %}
+            <a class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-soft transition hover:bg-emerald-700" href="{{ url_for('reports.export_excel', **export_args) }}">
+                <i class="fa-solid fa-file-excel mr-2" aria-hidden="true"></i>Export Excel
+            </a>
+            <a class="rounded-lg bg-slate-700 px-4 py-2 text-sm font-semibold text-white shadow-soft transition hover:bg-slate-800" href="{{ url_for('reports.export_csv', **export_args) }}">
+                <i class="fa-solid fa-file-csv mr-2" aria-hidden="true"></i>Export CSV
+            </a>
+        </div>
+        {% endif %}
     </div>
-    <div class="grid gap-4 md:grid-cols-3">
-        {% for report in ["Surveillance Summary", "Registry Export", "Forecasting Brief"] %}
-        <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
-            <h3 class="text-base font-semibold text-slate-950 dark:text-white">{{ report }}</h3>
-            <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Report shell prepared for generation workflow.</p>
-            <button class="mt-5 rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800" type="button">Prepare</button>
-        </section>
-        {% endfor %}
-    </div>
+
+    <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+        <form class="space-y-5" method="get" action="{{ url_for('reports.summary') }}">
+            <div class="grid gap-4 lg:grid-cols-2">
+                <label class="block">
+                    <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">Date from</span>
+                    <input type="date" name="date_from" value="{{ filters.date_from or '' }}" class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950">
+                </label>
+                <label class="block">
+                    <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">Date to</span>
+                    <input type="date" name="date_to" value="{{ filters.date_to or '' }}" class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950">
+                </label>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                {% set selects = [
+                    ('hospital_code', 'Hospital code', filter_options.hospital_codes),
+                    ('data_steward_code', 'Data steward code', filter_options.data_steward_codes),
+                    ('region', 'Region', filter_options.regions),
+                    ('province', 'Province', filter_options.provinces),
+                    ('city', 'City/Municipality', filter_options.cities),
+                    ('sex', 'Sex', filter_options.sexes),
+                    ('age_group', 'Age group', filter_options.age_groups),
+                    ('method_category', 'Incident type / method category', filter_options.method_categories)
+                ] %}
+                {% for name, label, choices in selects %}
+                <label class="block">
+                    <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">{{ label }}</span>
+                    <select name="{{ name }}" class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950">
+                        <option value="">All</option>
+                        {% for choice in choices %}
+                        <option value="{{ choice }}" {% if filters[name] == choice %}selected{% endif %}>{{ choice }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                {% endfor %}
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+                <button type="submit" class="rounded-lg bg-sentinel-600 px-4 py-2 text-sm font-semibold text-white shadow-soft transition hover:bg-sentinel-700">
+                    <i class="fa-solid fa-table-list mr-2" aria-hidden="true"></i>Generate Report
+                </button>
+                <a href="{{ url_for('reports.index') }}" class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">Clear filters</a>
+            </div>
+        </form>
+    </section>
+
+    {% if report %}
+    <section class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-soft dark:border-slate-800 dark:bg-slate-900">
+        <div class="border-b border-slate-200 p-5 dark:border-slate-800">
+            <h2 class="text-lg font-bold text-slate-950 dark:text-white">{{ report.title }}</h2>
+            <div class="mt-3 flex flex-wrap gap-3">
+                {% for item in report.summary %}
+                <div class="rounded-lg border border-slate-200 px-4 py-3 dark:border-slate-700">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ item.label }}</p>
+                    <p class="mt-1 text-2xl font-bold text-slate-950 dark:text-white">{{ item.value }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="p-5">
+            <div class="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+                <table class="js-data-table min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800" data-dt-scroll-x>
+                    <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-950 dark:text-slate-400">
+                        <tr>
+                            {% for column in report.columns %}
+                            <th class="px-4 py-3">{{ column }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                        {% for row in report.rows %}
+                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-950">
+                            {% if row is mapping %}
+                                {% for column in report.columns %}
+                                <td class="whitespace-nowrap px-4 py-3 text-slate-700 dark:text-slate-200">{{ row[column] }}</td>
+                                {% endfor %}
+                            {% else %}
+                                {% for cell in row %}
+                                <td class="whitespace-nowrap px-4 py-3 text-slate-700 dark:text-slate-200">{{ cell }}</td>
+                                {% endfor %}
+                            {% endif %}
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="{{ report.columns|length }}" class="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">No records match the selected filters.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+    {% else %}
+    <section class="rounded-lg border border-dashed border-slate-300 bg-white p-10 text-center shadow-soft dark:border-slate-700 dark:bg-slate-900">
+        <i class="fa-solid fa-file-lines text-3xl text-sentinel-600" aria-hidden="true"></i>
+        <h2 class="mt-3 text-lg font-bold text-slate-950 dark:text-white">Generate the registry entries report</h2>
+        <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Choose filters to preview registry entries before exporting.</p>
+    </section>
+    {% endif %}
 </div>
 {% endblock %}

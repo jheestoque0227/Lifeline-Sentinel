@@ -80,7 +80,6 @@ def apply_registry_form(registry, form, user, is_create=False):
     registry.nationality = _empty_to_none(form.nationality.data)
     registry.religion = _empty_to_none(form.religion.data)
     registry.religion_other = _other_value(form.religion.data, form.religion_other.data)
-    registry.risk_level = None
     registry.is_valid_registry_case = True
     registry.invalid_reason = None
     registry.is_first_incident = _to_bool(form.is_first_incident.data)

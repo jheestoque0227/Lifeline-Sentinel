@@ -104,7 +104,15 @@ def create_app(config_class=Config):
         if not current_user.is_authenticated:
             return redirect(url_for("auth.login"))
         if current_user.role == "Encoder":
-            return redirect(url_for("registry.index"))
+            return redirect(url_for("analytics.descriptive"))
         return redirect(url_for("analytics.analytics_dashboard"))
+
+    @app.route("/dashboard/")
+    def legacy_dashboard():
+        return redirect(url_for("analytics.analytics_dashboard"))
+
+    @app.route("/dashboard/registry-statistics")
+    def legacy_registry_statistics():
+        return redirect(url_for("analytics.descriptive"))
 
     return app

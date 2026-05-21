@@ -1,8 +1,8 @@
 {% set nav_items = [
-    {"label": "Dashboard", "endpoint": "analytics.analytics_dashboard", "roles": ["Admin", "Analyst"], "icon": "fa-solid fa-chart-line"},
+    {"label": "Dashboard", "endpoint": "analytics.analytics_dashboard", "roles": ["Admin", "Encoder", "Analyst"], "icon": "fa-solid fa-chart-line"},
+    {"label": "ML Models", "endpoint": "analytics.ml_models", "roles": ["Admin", "Analyst"], "icon": "fa-solid fa-brain"},
     {"label": "Registry", "endpoint": "registry.index", "roles": ["Admin", "Encoder"], "icon": "fa-solid fa-pen-to-square"},
-    {"label": "Registry Stats", "endpoint": "registry.statistics", "roles": ["Admin", "Encoder", "Analyst"], "icon": "fa-solid fa-chart-pie"},
-    {"label": "Reports", "endpoint": "reports.index", "roles": ["Admin", "Analyst"], "icon": "fa-solid fa-file-lines"},
+    {"label": "Reports", "endpoint": "reports.index", "roles": ["Admin", "Encoder", "Analyst"], "icon": "fa-solid fa-file-lines"},
     {"label": "User Management", "endpoint": "admin.users", "roles": ["Admin"], "icon": "fa-solid fa-user-gear"}
 ] %}
 <div class="fixed inset-0 z-40 bg-slate-950/40 lg:hidden" x-show="sidebarOpen" x-transition.opacity x-on:click="sidebarOpen = false"></div>
@@ -29,7 +29,7 @@
     <nav class="mt-4 space-y-1 px-4" x-bind:class="{ 'px-3': sidebarCollapsed }">
         {% for item in nav_items %}
             {% if current_user.role in item.roles %}
-                {% set active = request.endpoint == item.endpoint %}
+                {% set active = request.endpoint == item.endpoint or (item.endpoint == 'analytics.analytics_dashboard' and request.endpoint == 'analytics.descriptive') %}
                 <a href="{{ url_for(item.endpoint) }}" class="group flex items-center gap-2.5 rounded-2xl px-3 py-2.5 text-sm font-medium transition {{ 'bg-sentinel-50 text-sentinel-700 dark:bg-sentinel-900/40 dark:text-white' if active else 'text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white' }}" x-bind:class="{ 'justify-center px-2': sidebarCollapsed }">
                     <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl {{ 'bg-sentinel-600 text-white' if active else 'bg-slate-100 text-slate-500 group-hover:text-slate-900 dark:bg-slate-800 dark:text-slate-300' }}">
                         <i class="{{ item.icon }} text-sm" aria-hidden="true"></i>

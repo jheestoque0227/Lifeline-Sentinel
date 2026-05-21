@@ -107,8 +107,10 @@ window.initDataTables = function initDataTables(root) {
     window.jQuery(scope).find("table.js-data-table").addBack("table.js-data-table").each(function () {
         const $table = window.jQuery(this);
         if (window.jQuery.fn.DataTable.isDataTable(this)) return;
+        const enableScrollX = $table.is("[data-dt-scroll-x]");
         const dataTable = $table.DataTable({
             autoWidth: false,
+            scrollX: enableScrollX,
             pageLength: 10,
             lengthMenu: [10, 25, 50, 100],
             order: [],

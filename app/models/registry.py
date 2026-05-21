@@ -31,8 +31,6 @@ class Registry(db.Model):
     religion = db.Column(db.String(100), nullable=True)
     religion_other = db.Column(db.String(150), nullable=True)
 
-    risk_level = db.Column(db.Enum("Low", "Moderate", "High"), nullable=True)
-
     created_by = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
     updated_by = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
     deleted_by = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)

@@ -1,0 +1,223 @@
+{% extends "layouts/base.html" %}
+{% block title %}Descriptive Analytics{% endblock %}
+{% block content %}
+{% macro chart_card(title, subtitle, chart_key, height="h-80") %}
+<section class="rounded-lg border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+    <div>
+        <h3 class="text-base font-bold text-slate-950 dark:text-white">{{ title }}</h3>
+        <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ subtitle }}</p>
+    </div>
+    <div class="mt-4 {{ height }}">
+        <canvas data-analytics-chart="{{ chart_key }}"></canvas>
+    </div>
+</section>
+{% endmacro %}
+
+{% macro table_card(title, rows) %}
+<section class="rounded-lg border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+    <h3 class="text-base font-bold text-slate-950 dark:text-white">{{ title }}</h3>
+    <div class="mt-4 space-y-3">
+        {% for row in rows %}
+        <div class="flex items-center justify-between gap-3 border-b border-slate-100 pb-2 text-sm last:border-b-0 dark:border-slate-800">
+            <span class="truncate text-slate-700 dark:text-slate-200" title="{{ row.label }}">{{ row.label }}</span>
+            <span class="font-bold text-slate-950 dark:text-white">{{ row.count }}</span>
+        </div>
+        {% else %}
+        <p class="text-sm text-slate-500 dark:text-slate-400">No data available.</p>
+        {% endfor %}
+    </div>
+</section>
+{% endmacro %}
+
+<div class="space-y-6">
+    <div class="flex flex-wrap items-start justify-between gap-3">
+        <div>
+            <p class="text-sm font-semibold uppercase tracking-wide text-sentinel-600 dark:text-sentinel-100">Analytics</p>
+            <h1 class="mt-1 text-2xl font-bold tracking-tight text-slate-950 dark:text-white">Descriptive Analytics Dashboard</h1>
+            <p class="mt-2 max-w-3xl text-sm text-slate-500 dark:text-slate-400">Historical registry summaries showing what happened across patient demographics, incident patterns, and psychiatric or behavioral profiles.</p>
+        </div>
+        <a href="{{ url_for('reports.index') }}" class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">
+            <i class="fa-solid fa-file-lines mr-2" aria-hidden="true"></i>Reports
+        </a>
+    </div>
+
+    <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+        <form method="get" action="{{ url_for('analytics.descriptive') }}" class="space-y-5">
+            <div class="grid gap-4 lg:grid-cols-2">
+                <label class="block">
+                    <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">Date from</span>
+                    <input type="date" name="date_from" value="{{ filters.date_from or '' }}" class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950">
+                </label>
+                <label class="block">
+                    <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">Date to</span>
+                    <input type="date" name="date_to" value="{{ filters.date_to or '' }}" class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950">
+                </label>
+            </div>
+            <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                {% set selects = [
+                    ('hospital_code', 'Hospital code', filter_options.hospital_codes),
+                    ('region', 'Region', filter_options.regions),
+                    ('province', 'Province', filter_options.provinces),
+                    ('city', 'City/Municipality', filter_options.cities),
+                    ('sex', 'Sex', filter_options.sexes),
+                    ('age_group', 'Age group', filter_options.age_groups),
+                    ('method_category', 'Incident method category', filter_options.method_categories),
+                    ('incident_recurrence', 'First-time vs repeated', filter_options.incident_recurrences),
+                    ('department', 'Department', filter_options.departments),
+                    ('disposition', 'Disposition', filter_options.dispositions)
+                ] %}
+                {% for name, label, choices in selects %}
+                <label class="block">
+                    <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">{{ label }}</span>
+                    <select name="{{ name }}" class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950">
+                        <option value="">All</option>
+                        {% for choice in choices %}
+                        <option value="{{ choice }}" {% if filters[name] == choice %}selected{% endif %}>{{ choice }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                {% endfor %}
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+                <button type="submit" class="rounded-lg bg-sentinel-600 px-4 py-2 text-sm font-semibold text-white shadow-soft transition hover:bg-sentinel-700">
+                    <i class="fa-solid fa-filter mr-2" aria-hidden="true"></i>Apply Filters
+                </button>
+                <a href="{{ url_for('analytics.descriptive') }}" class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">Clear filters</a>
+            </div>
+        </form>
+    </section>
+
+    <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
+        {% set metrics = [
+            ('Total cases', dashboard.summary.total_cases, 'Registry cases'),
+            ('Total incidents', dashboard.summary.total_incidents, 'Incident records'),
+            ('First-time incidents', dashboard.summary.first_time_incidents, 'Marked first incident'),
+            ('Repeated incidents', dashboard.summary.repeated_incidents, 'Repeated or multiple incidents'),
+            ('Most common method', dashboard.summary.most_common_method, 'ICD-10 method'),
+            ('Most common location', dashboard.summary.most_common_location, 'Incident location')
+        ] %}
+        {% for label, value, caption in metrics %}
+        <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ label }}</p>
+            <p class="mt-2 truncate text-2xl font-bold text-slate-950 dark:text-white" title="{{ value }}">{{ value }}</p>
+            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ caption }}</p>
+        </div>
+        {% endfor %}
+    </section>
+
+    {% if not dashboard.has_data %}
+    <section class="rounded-lg border border-dashed border-slate-300 bg-white p-10 text-center shadow-soft dark:border-slate-700 dark:bg-slate-900">
+        <i class="fa-solid fa-chart-column text-3xl text-sentinel-600" aria-hidden="true"></i>
+        <h2 class="mt-3 text-lg font-bold text-slate-950 dark:text-white">No matching analytics data</h2>
+        <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Adjust the filters to include registry records with historical data.</p>
+    </section>
+    {% else %}
+    <section class="space-y-4">
+        <div>
+            <p class="text-sm font-semibold uppercase tracking-wide text-sentinel-600 dark:text-sentinel-100">Overview</p>
+            <h2 class="text-xl font-bold text-slate-950 dark:text-white">Registry Volume and Recurrence</h2>
+        </div>
+        <div class="grid gap-4 xl:grid-cols-[1.4fr_0.8fr]">
+            {{ chart_card("Monthly trends", "Cases by presentation month", "monthlyTrends", "h-80") }}
+            {{ chart_card("First-time vs repeated", "Incident recurrence profile", "recurrence", "h-80") }}
+        </div>
+    </section>
+
+    <section class="space-y-4">
+        <div>
+            <p class="text-sm font-semibold uppercase tracking-wide text-sentinel-600 dark:text-sentinel-100">Patient Demographics</p>
+            <h2 class="text-xl font-bold text-slate-950 dark:text-white">Patient Demographic Analytics</h2>
+        </div>
+        <div class="grid gap-4 xl:grid-cols-3">
+            {{ chart_card("Age distribution", "Cases by age group", "ageDistribution") }}
+            {{ chart_card("Sex distribution", "Sex at birth", "sexDistribution") }}
+            {{ chart_card("Gender identity", "Gender identity distribution", "genderIdentity") }}
+            {{ chart_card("Sexual orientation", "Orientation distribution", "sexualOrientation") }}
+            {{ chart_card("Civil status", "Marital or civil status", "civilStatus") }}
+            {{ chart_card("Educational attainment", "Highest educational attainment", "education") }}
+            {{ chart_card("Employment status", "Employment profile", "employment") }}
+            {{ chart_card("Nationality", "Top nationalities", "nationality") }}
+            {{ chart_card("Religion", "Top religions", "religion") }}
+        </div>
+    </section>
+
+    <section class="space-y-4">
+        <div>
+            <p class="text-sm font-semibold uppercase tracking-wide text-sentinel-600 dark:text-sentinel-100">Incident Patterns</p>
+            <h2 class="text-xl font-bold text-slate-950 dark:text-white">Incident Analytics</h2>
+        </div>
+        <div class="grid gap-4 xl:grid-cols-3">
+            {{ chart_card("Common methods", "ICD-10 suicide/self-harm methods", "methods", "h-96") }}
+            {{ chart_card("Incident locations", "Region, province, and city/municipality", "locations") }}
+            {{ chart_card("Day occurrence", "Incidents by day of week", "incidentDays") }}
+            {{ chart_card("Time occurrence", "Incidents by time range", "incidentTimes") }}
+            {{ chart_card("Department frequency", "Hospital department reporting", "departments") }}
+        </div>
+    </section>
+
+    <section class="space-y-4">
+        <div>
+            <p class="text-sm font-semibold uppercase tracking-wide text-sentinel-600 dark:text-sentinel-100">Psychiatric and Behavioral Profile</p>
+            <h2 class="text-xl font-bold text-slate-950 dark:text-white">Psychiatric and Behavioral Analytics</h2>
+        </div>
+        <div class="grid gap-4 xl:grid-cols-3">
+            {{ chart_card("Previous consultation", "Prior mental health consultation", "previousConsultation") }}
+            {{ chart_card("Family history", "Family psychiatric or suicide history", "familyHistory") }}
+            {{ chart_card("Substance use", "Lifetime substance use", "substanceUse") }}
+            {{ chart_card("Common substances", "Substances involved", "commonSubstances") }}
+            {{ chart_card("Psychiatric diagnosis", "Primary or secondary diagnosis codes", "diagnosis") }}
+            {{ chart_card("Disposition outcomes", "Admitted, referred, discharged, or other outcomes", "disposition") }}
+        </div>
+    </section>
+
+    <section class="grid gap-4 lg:grid-cols-2 xl:grid-cols-4">
+        {{ table_card("Nationality Distribution", dashboard.tables.nationality) }}
+        {{ table_card("Religion Distribution", dashboard.tables.religion) }}
+        {{ table_card("Diagnosis Distribution", dashboard.tables.diagnosis) }}
+        {{ table_card("Disposition Outcomes", dashboard.tables.disposition) }}
+    </section>
+    {% endif %}
+</div>
+
+<script id="descriptive-chart-data" type="application/json">{{ dashboard.charts|tojson }}</script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const payload = JSON.parse(document.getElementById("descriptive-chart-data").textContent || "{}");
+    const palette = ["#0f766e", "#2563eb", "#7c3aed", "#f59e0b", "#dc2626", "#0891b2", "#65a30d", "#be123c", "#4f46e5", "#64748b", "#ea580c", "#16a34a"];
+
+    document.querySelectorAll("[data-analytics-chart]").forEach((canvas) => {
+        const chart = payload[canvas.dataset.analyticsChart];
+        if (!chart || !window.Chart) return;
+        const isCircular = chart.type === "doughnut" || chart.type === "pie";
+        new Chart(canvas, {
+            type: chart.type,
+            data: {
+                labels: chart.labels,
+                datasets: [{
+                    label: "Count",
+                    data: chart.values,
+                    borderColor: chart.type === "line" ? "#0f766e" : "#ffffff",
+                    backgroundColor: chart.type === "line" ? "rgba(15, 118, 110, 0.14)" : palette,
+                    borderWidth: chart.type === "line" ? 2 : 1,
+                    fill: chart.type === "line",
+                    tension: 0.35,
+                    borderRadius: chart.type === "bar" ? 8 : 0
+                }]
+            },
+            options: {
+                indexAxis: chart.indexAxis || "x",
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: isCircular, position: "bottom" }
+                },
+                scales: isCircular ? undefined : {
+                    x: { grid: { display: false }, ticks: { color: "#64748b" } },
+                    y: { beginAtZero: true, grid: { color: "rgba(148, 163, 184, 0.25)" }, ticks: { precision: 0, color: "#64748b" } }
+                }
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

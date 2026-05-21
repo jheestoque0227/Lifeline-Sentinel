@@ -101,4 +101,3 @@ DISPOSITIONS = [
     "Transfer to another facility",
     "Other",
 ]
-RISK_LEVELS = [("Low", "Low"), ("Moderate", "Moderate"), ("High", "High")]

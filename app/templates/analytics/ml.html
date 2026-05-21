@@ -1,0 +1,296 @@
+{% extends "layouts/base.html" %}
+{% block title %}ML Models and Forecasting{% endblock %}
+{% block content %}
+<div class="space-y-6">
+    <div class="flex flex-wrap items-start justify-between gap-3">
+        <div>
+            <p class="text-sm font-semibold uppercase tracking-wide text-sentinel-600 dark:text-sentinel-100">Phase 6 Analytics</p>
+            <h1 class="mt-1 text-2xl font-bold tracking-tight text-slate-950 dark:text-white">ML Models and Forecasting</h1>
+            <p class="mt-2 max-w-4xl text-sm text-slate-500 dark:text-slate-400">Estimated risk profiling, behavioral pattern discovery, and incident trend forecasting based on historical registry patterns. For decision support only and not a clinical diagnosis.</p>
+        </div>
+        <a href="{{ url_for('analytics.descriptive') }}" class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">
+            <i class="fa-solid fa-chart-column mr-2" aria-hidden="true"></i>Descriptive Dashboard
+        </a>
+    </div>
+
+    <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+        <form method="get" action="{{ url_for('analytics.ml_models') }}" class="space-y-5">
+            <div class="grid gap-4 md:grid-cols-3">
+                <label class="block">
+                    <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">Date from</span>
+                    <input type="date" name="date_from" value="{{ filters.date_from or '' }}" class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950">
+                </label>
+                <label class="block">
+                    <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">Date to</span>
+                    <input type="date" name="date_to" value="{{ filters.date_to or '' }}" class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950">
+                </label>
+                <label class="block">
+                    <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">Forecast aggregation</span>
+                    <select name="forecast_frequency" class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950">
+                        <option value="monthly" {% if filters.forecast_frequency == 'monthly' %}selected{% endif %}>Monthly</option>
+                        <option value="weekly" {% if filters.forecast_frequency == 'weekly' %}selected{% endif %}>Weekly</option>
+                    </select>
+                </label>
+            </div>
+            <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                {% set selects = [
+                    ('hospital_code', 'Hospital code', filter_options.hospital_codes),
+                    ('region', 'Region', filter_options.regions),
+                    ('province', 'Province', filter_options.provinces),
+                    ('city', 'City/Municipality', filter_options.cities),
+                    ('sex', 'Sex', filter_options.sexes),
+                    ('age_group', 'Age group', filter_options.age_groups),
+                    ('method_category', 'Incident method category', filter_options.method_categories),
+                    ('incident_recurrence', 'First-time vs repeated', filter_options.incident_recurrences),
+                    ('department', 'Department', filter_options.departments),
+                    ('disposition', 'Disposition', filter_options.dispositions)
+                ] %}
+                {% for name, label, choices in selects %}
+                <label class="block">
+                    <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">{{ label }}</span>
+                    <select name="{{ name }}" class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950">
+                        <option value="">All</option>
+                        {% for choice in choices %}
+                        <option value="{{ choice }}" {% if filters[name] == choice %}selected{% endif %}>{{ choice }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                {% endfor %}
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+                <button type="submit" class="rounded-lg bg-sentinel-600 px-4 py-2 text-sm font-semibold text-white shadow-soft transition hover:bg-sentinel-700">
+                    <i class="fa-solid fa-sliders mr-2" aria-hidden="true"></i>Run Phase 6 Analytics
+                </button>
+                <a href="{{ url_for('analytics.ml_models') }}" class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">Clear filters</a>
+            </div>
+        </form>
+    </section>
+
+    <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {% set metrics = [
+            ('Records analyzed', dashboard.summary.records_analyzed, 'Registry records in scope'),
+            ('Risk profiling', dashboard.summary.model_status, 'Random Forest readiness'),
+            ('Clusters', dashboard.summary.cluster_count, 'K-Means pattern groups'),
+            ('Forecast horizon', dashboard.summary.forecast_periods ~ ' ' ~ dashboard.summary.forecast_frequency|lower, 'Projected incident periods')
+        ] %}
+        {% for label, value, caption in metrics %}
+        <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ label }}</p>
+            <p class="mt-2 truncate text-2xl font-bold text-slate-950 dark:text-white" title="{{ value }}">{{ value }}</p>
+            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ caption }}</p>
+        </div>
+        {% endfor %}
+    </section>
+
+    <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+            <div>
+                <h2 class="text-lg font-bold text-slate-950 dark:text-white">ML Readiness Checks</h2>
+                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Patient identifiers, names, free-text notes, and steward fields are excluded from model features.</p>
+            </div>
+            <span class="rounded-full bg-sentinel-50 px-3 py-1 text-xs font-semibold text-sentinel-700 dark:bg-sentinel-900/40 dark:text-sentinel-100">{{ dashboard.ethics_note }}</span>
+        </div>
+        <div class="mt-4 grid gap-3 md:grid-cols-3 xl:grid-cols-6">
+            {% set checks = [
+                ('Total records', dashboard.readiness.total_records),
+                ('Labeled risk records', dashboard.readiness.labeled_risk_records),
+                ('Incident date records', dashboard.readiness.incident_date_records),
+                ('Target exists', 'Yes' if dashboard.readiness.target_exists else 'No'),
+                ('Features present', 'Yes' if dashboard.readiness.feature_columns_present else 'No'),
+                ('Missing values handled', 'Yes' if dashboard.readiness.missing_values_handled else 'No')
+            ] %}
+            {% for label, value in checks %}
+            <div class="rounded-lg bg-slate-50 p-3 dark:bg-slate-950">
+                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ label }}</p>
+                <p class="mt-1 text-base font-bold text-slate-950 dark:text-white">{{ value }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    {% if not dashboard.has_data %}
+    <section class="rounded-lg border border-dashed border-slate-300 bg-white p-10 text-center shadow-soft dark:border-slate-700 dark:bg-slate-900">
+        <i class="fa-solid fa-brain text-3xl text-sentinel-600" aria-hidden="true"></i>
+        <h2 class="mt-3 text-lg font-bold text-slate-950 dark:text-white">No data available for Phase 6 analytics</h2>
+        <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Adjust the filters or add registry records before running ML models and forecasting.</p>
+    </section>
+    {% else %}
+    <section class="grid gap-4 xl:grid-cols-2">
+        <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+            <h2 class="text-lg font-bold text-slate-950 dark:text-white">Risk Profiling</h2>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ dashboard.risk.note }}</p>
+            <div class="mt-4 h-80"><canvas data-ml-chart="riskDistribution"></canvas></div>
+            <div class="mt-4 grid gap-2 sm:grid-cols-4">
+                {% for label, value in dashboard.risk.metrics.items() %}
+                <div class="rounded-lg bg-slate-50 p-3 dark:bg-slate-950">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ label|replace('_', ' ') }}</p>
+                    <p class="mt-1 text-lg font-bold text-slate-950 dark:text-white">{{ value if value is not none else 'N/A' }}</p>
+                </div>
+                {% else %}
+                <div class="rounded-lg bg-amber-50 p-3 text-sm font-semibold text-amber-800 dark:bg-amber-950/40 dark:text-amber-100 sm:col-span-4">{{ dashboard.risk.note }}</div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+            <h2 class="text-lg font-bold text-slate-950 dark:text-white">Feature Importance</h2>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Relative model influence when Random Forest has enough labeled records.</p>
+            <div class="mt-4 h-80"><canvas data-ml-chart="featureImportance"></canvas></div>
+        </div>
+    </section>
+
+    {% if dashboard.risk.confusion_matrix.matrix %}
+    <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+        <h2 class="text-lg font-bold text-slate-950 dark:text-white">Confusion Matrix</h2>
+        <div class="mt-4 overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800">
+                <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-950 dark:text-slate-400">
+                    <tr><th class="px-4 py-3">Actual \ Estimated</th>{% for label in dashboard.risk.confusion_matrix.labels %}<th class="px-4 py-3">{{ label }}</th>{% endfor %}</tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                    {% for row in dashboard.risk.confusion_matrix.matrix %}
+                    <tr><td class="px-4 py-3 font-semibold">{{ dashboard.risk.confusion_matrix.labels[loop.index0] }}</td>{% for value in row %}<td class="px-4 py-3">{{ value }}</td>{% endfor %}</tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+    {% endif %}
+
+    <section class="grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
+        <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+            <h2 class="text-lg font-bold text-slate-950 dark:text-white">Pattern Discovery</h2>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ dashboard.clustering.note }}</p>
+            <div class="mt-4 h-80"><canvas data-ml-chart="clusterDistribution"></canvas></div>
+        </div>
+        <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+            <h2 class="text-lg font-bold text-slate-950 dark:text-white">Cluster Profile Summaries</h2>
+            <div class="mt-4 overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800">
+                    <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-950 dark:text-slate-400">
+                        <tr><th class="px-4 py-3">Cluster</th><th class="px-4 py-3">Records</th><th class="px-4 py-3">Median age</th><th class="px-4 py-3">Key characteristics</th></tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                        {% for row in dashboard.clustering.profiles %}
+                        <tr>
+                            <td class="px-4 py-3 font-semibold text-slate-950 dark:text-white">{{ row.label }}</td>
+                            <td class="px-4 py-3">{{ row.count }}</td>
+                            <td class="px-4 py-3">{{ row.median_age }}</td>
+                            <td class="px-4 py-3">{{ row.characteristics|join('; ') }}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="4" class="px-4 py-8 text-center text-slate-500">{{ dashboard.clustering.note }}</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <section class="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
+        <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+            <h2 class="text-lg font-bold text-slate-950 dark:text-white">Trend and Forecasting</h2>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ dashboard.forecasting.note }}</p>
+            <div class="mt-4 h-96"><canvas data-ml-chart="forecast"></canvas></div>
+        </div>
+        <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+            <h2 class="text-lg font-bold text-slate-950 dark:text-white">Seasonal Patterns</h2>
+            <div class="mt-4 h-72"><canvas data-ml-chart="seasonality"></canvas></div>
+            <div class="mt-4 grid gap-2 sm:grid-cols-3">
+                {% for label, value in dashboard.forecasting.metrics.items() %}
+                <div class="rounded-lg bg-slate-50 p-3 dark:bg-slate-950">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ label|upper }}</p>
+                    <p class="mt-1 text-lg font-bold text-slate-950 dark:text-white">{{ value if value is not none else 'N/A' }}</p>
+                </div>
+                {% else %}
+                <div class="rounded-lg bg-amber-50 p-3 text-sm font-semibold text-amber-800 dark:bg-amber-950/40 dark:text-amber-100 sm:col-span-3">{{ dashboard.forecasting.note }}</div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+        <h2 class="text-lg font-bold text-slate-950 dark:text-white">Estimated Risk Profile Sample</h2>
+        <div class="mt-4 overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800">
+                <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-950 dark:text-slate-400">
+                    <tr><th class="px-4 py-3">Registry code</th><th class="px-4 py-3">Age group</th><th class="px-4 py-3">Sex</th><th class="px-4 py-3">Incidents</th><th class="px-4 py-3">Substance use</th><th class="px-4 py-3">Estimated profile</th><th class="px-4 py-3">Probability score</th></tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                    {% for row in dashboard.risk.profile_rows %}
+                    <tr>
+                        <td class="px-4 py-3 font-semibold text-slate-950 dark:text-white">{{ row.registry_code }}</td>
+                        <td class="px-4 py-3">{{ row.age_group }}</td>
+                        <td class="px-4 py-3">{{ row.sex }}</td>
+                        <td class="px-4 py-3">{{ row.incident_count }}</td>
+                        <td class="px-4 py-3">{{ row.substance_use }}</td>
+                        <td class="px-4 py-3">{{ row.profile }}</td>
+                        <td class="px-4 py-3">{{ row.probability if row.probability is not none else 'N/A' }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="7" class="px-4 py-8 text-center text-slate-500">No risk profile rows available.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+    {% endif %}
+</div>
+
+<script id="ml-dashboard-data" type="application/json">{{ dashboard|tojson }}</script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const payload = JSON.parse(document.getElementById("ml-dashboard-data").textContent || "{}");
+    if (!window.Chart) return;
+    const palette = ["#0f766e", "#2563eb", "#f59e0b", "#dc2626", "#7c3aed", "#0891b2", "#65a30d", "#be123c"];
+    const draw = (key, config) => {
+        const canvas = document.querySelector(`[data-ml-chart="${key}"]`);
+        if (!canvas) return;
+        new Chart(canvas, config);
+    };
+
+    draw("riskDistribution", {
+        type: "doughnut",
+        data: { labels: Object.keys(payload.risk.distribution || {}), datasets: [{ data: Object.values(payload.risk.distribution || {}), backgroundColor: ["#16a34a", "#f59e0b", "#dc2626"] }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom" } } }
+    });
+
+    draw("featureImportance", {
+        type: "bar",
+        data: { labels: (payload.risk.feature_importance || []).map((row) => row.label), datasets: [{ label: "Importance", data: (payload.risk.feature_importance || []).map((row) => row.value), backgroundColor: "#0f766e", borderRadius: 6 }] },
+        options: { indexAxis: "y", responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true }, y: { grid: { display: false } } } }
+    });
+
+    draw("clusterDistribution", {
+        type: "doughnut",
+        data: { labels: Object.keys(payload.clustering.distribution || {}), datasets: [{ data: Object.values(payload.clustering.distribution || {}), backgroundColor: palette }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom" } } }
+    });
+
+    const observedLabels = payload.forecasting.observed_labels || [];
+    const forecastLabels = payload.forecasting.forecast_labels || [];
+    const observedValues = payload.forecasting.observed_values || [];
+    const forecastValues = payload.forecasting.forecast_values || [];
+    draw("forecast", {
+        type: "line",
+        data: {
+            labels: observedLabels.concat(forecastLabels),
+            datasets: [
+                { label: "Historical incidents", data: observedValues.concat(forecastLabels.map(() => null)), borderColor: "#0f766e", backgroundColor: "rgba(15, 118, 110, 0.12)", tension: 0.25, fill: true },
+                { label: "Moving average", data: (payload.forecasting.moving_average_values || []).concat(forecastLabels.map(() => null)), borderColor: "#2563eb", borderDash: [3, 3], tension: 0.25 },
+                { label: "Fitted comparison", data: (payload.forecasting.fitted_values || []).concat(forecastLabels.map(() => null)), borderColor: "#7c3aed", tension: 0.25 },
+                { label: "Forecast", data: observedLabels.map(() => null).concat(forecastValues), borderColor: "#f59e0b", borderDash: [6, 4], tension: 0.25 },
+                { label: "Forecast lower CI", data: observedLabels.map(() => null).concat((payload.forecasting.confidence_interval || {}).lower || []), borderColor: "rgba(245, 158, 11, 0.35)", pointRadius: 0, tension: 0.25 },
+                { label: "Forecast upper CI", data: observedLabels.map(() => null).concat((payload.forecasting.confidence_interval || {}).upper || []), borderColor: "rgba(245, 158, 11, 0.35)", pointRadius: 0, tension: 0.25 }
+            ]
+        },
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { precision: 0 } }, x: { grid: { display: false } } } }
+    });
+
+    draw("seasonality", {
+        type: "bar",
+        data: { labels: (payload.forecasting.seasonal_patterns || {}).labels || [], datasets: [{ label: "Incidents", data: (payload.forecasting.seasonal_patterns || {}).values || [], backgroundColor: "#2563eb", borderRadius: 6 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } }, x: { grid: { display: false } } } }
+    });
+});
+</script>
+{% endblock %}

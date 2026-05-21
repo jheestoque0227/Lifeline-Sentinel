@@ -89,7 +89,6 @@ def _apply_dummy_registry(registry, index, actor, hospital_code, rng, locations)
     registry.reporting_department = rng.choice(["ER", "OPS"])
     registry.is_valid_registry_case = True
     registry.invalid_reason = None
-    registry.risk_level = None
     registry.is_first_incident = rng.choice([True, False])
     registry.has_past_2_month_incident = has_past_incident
     registry.patient_identifier = registry.patient_identifier or f"DUMMY-HN-{index:05d}"
