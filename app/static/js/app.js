@@ -104,29 +104,43 @@ window.initSubstanceTypeFields = function initSubstanceTypeFields(root) {
 window.initDataTables = function initDataTables(root) {
     if (!window.jQuery || !window.jQuery.fn || !window.jQuery.fn.DataTable) return;
     const scope = root || document;
+    const compactPaging = {
+        type: "full_numbers",
+        buttons: 1
+    };
     window.jQuery(scope).find("table.js-data-table").addBack("table.js-data-table").each(function () {
         const $table = window.jQuery(this);
         if (window.jQuery.fn.DataTable.isDataTable(this)) return;
         const enableScrollX = $table.is("[data-dt-scroll-x]");
+        const enableSearch = !$table.is("[data-dt-search='false']");
         const dataTable = $table.DataTable({
             autoWidth: false,
             scrollX: enableScrollX,
+            searching: enableSearch,
             pageLength: 10,
             lengthMenu: [10, 25, 50, 100],
             order: [],
             responsive: false,
             layout: {
                 topStart: null,
-                topEnd: "search",
+                topEnd: enableSearch ? "search" : null,
                 bottomStart: ["pageLength", "info"],
-                bottomEnd: "paging"
+                bottomEnd: {
+                    paging: compactPaging
+                }
             },
             language: {
                 search: "",
                 searchPlaceholder: "Search",
                 lengthMenu: "_MENU_",
                 info: "Showing _START_ to _END_ of _TOTAL_ entries",
-                emptyTable: "No data available"
+                emptyTable: "No data available",
+                paginate: {
+                    first: "&lt;&lt;",
+                    previous: "&lt;",
+                    next: "&gt;",
+                    last: "&gt;&gt;"
+                }
             },
             columnDefs: [
                 { orderable: false, targets: "no-sort" }
@@ -172,11 +186,17 @@ window.initPatientSearchModal = function initPatientSearchModal(root) {
     const searchButton = modal.querySelector("[data-patient-search-button]");
     const closeButtons = modal.querySelectorAll("[data-patient-search-close]");
     const tableElement = modal.querySelector("table.js-patient-search-table");
+    const ageField = document.querySelector("[data-patient-age-field]");
+    const sexField = document.querySelector("[data-patient-sex-field]");
     if (!searchUrl || !searchInput || !searchButton || !tableElement) return;
 
     modal.dataset.patientSearchBound = "true";
     const dataTableRender = window.jQuery.fn.dataTable.render;
     const textRenderer = dataTableRender && dataTableRender.text ? dataTableRender.text() : undefined;
+    const compactPaging = {
+        type: "full_numbers",
+        buttons: 1
+    };
 
     const patientTable = window.jQuery(tableElement).DataTable({
         autoWidth: false,
@@ -190,15 +210,25 @@ window.initPatientSearchModal = function initPatientSearchModal(root) {
             topStart: null,
             topEnd: null,
             bottomStart: "info",
-            bottomEnd: "paging"
+            bottomEnd: {
+                paging: compactPaging
+            }
         },
         language: {
             info: "Showing _START_ to _END_ of _TOTAL_ entries",
-            emptyTable: "No data available"
+            emptyTable: "No data available",
+            paginate: {
+                first: "&lt;&lt;",
+                previous: "&lt;",
+                next: "&gt;",
+                last: "&gt;&gt;"
+            }
         },
         columns: [
             { data: "hospital_number", defaultContent: "", render: textRenderer },
-            { data: "patient_name", defaultContent: "", render: textRenderer }
+            { data: "patient_name", defaultContent: "", render: textRenderer },
+            { data: "age", defaultContent: "", render: textRenderer },
+            { data: "sex_at_birth", defaultContent: "", render: textRenderer }
         ]
     });
 
@@ -224,8 +254,20 @@ window.initPatientSearchModal = function initPatientSearchModal(root) {
         const rows = Array.isArray(payload) ? payload : payload.results || payload.patients || [];
         return rows.map((row) => ({
             hospital_number: row.hospital_number || row.hospitalNumber || row.hpercode || "",
-            patient_name: row.patient_name || row.patientName || row.full_name || row.name || ""
+            patient_name: row.patient_name || row.patientName || row.full_name || row.name || "",
+            birthdate: row.birthdate || row.patbdate || "",
+            age: row.age ?? "",
+            sex_at_birth: row.sex_at_birth || row.sexAtBirth || normalizePatientSex(row.patsex || row.sex || "")
         }));
+    };
+
+    const normalizePatientSex = (value) => {
+        const normalized = String(value || "").trim().toUpperCase();
+        if (["M", "MALE"].indexOf(normalized) >= 0) return "Male";
+        if (["F", "FEMALE"].indexOf(normalized) >= 0) return "Female";
+        if (["I", "INTERSEX"].indexOf(normalized) >= 0) return "Intersex";
+        if (["U", "UNK", "UNKNOWN"].indexOf(normalized) >= 0) return "Unknown";
+        return "";
     };
 
     const runSearch = () => {
@@ -283,6 +325,18 @@ window.initPatientSearchModal = function initPatientSearchModal(root) {
         patientIdentifier.value = row.hospital_number;
         patientIdentifier.dispatchEvent(new Event("input", { bubbles: true }));
         patientIdentifier.dispatchEvent(new Event("change", { bubbles: true }));
+        if (ageField && row.age !== "" && row.age !== null && row.age !== undefined) {
+            ageField.value = row.age;
+            ageField.dispatchEvent(new Event("input", { bubbles: true }));
+            ageField.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+        if (sexField && row.sex_at_birth) {
+            sexField.value = row.sex_at_birth;
+            sexField.dispatchEvent(new Event("change", { bubbles: true }));
+            if (window.jQuery) {
+                window.jQuery(sexField).trigger("change");
+            }
+        }
         closeModal();
     });
 };

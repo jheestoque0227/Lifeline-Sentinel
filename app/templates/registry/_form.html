@@ -103,8 +103,8 @@
                 {{ form.patient_identifier(class="mt-1 block w-full cursor-pointer rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-sentinel-600 focus:outline-none focus:ring-2 focus:ring-sentinel-600/20 dark:border-slate-700 dark:bg-slate-950 dark:text-white", data_patient_search_trigger="true", autocomplete="off", placeholder="Click to search patient") }}
                 {{ errors(form.patient_identifier) }}
             </div>
-            <div>{{ label(form.age) }}{{ field_input(form.age) }}</div>
-            <div>{{ label(form.sex_at_birth) }}{{ form.sex_at_birth(class="js-registry-select block w-full", data_placeholder="Select...") }}{{ errors(form.sex_at_birth) }}</div>
+            <div>{{ label(form.age) }}{{ form.age(class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-sentinel-600 focus:outline-none focus:ring-2 focus:ring-sentinel-600/20 dark:border-slate-700 dark:bg-slate-950 dark:text-white", data_patient_age_field="true") }}{{ errors(form.age) }}</div>
+            <div>{{ label(form.sex_at_birth) }}{{ form.sex_at_birth(class="js-registry-select block w-full", data_placeholder="Select...", data_patient_sex_field="true") }}{{ errors(form.sex_at_birth) }}</div>
             <div>{{ label(form.marital_status) }}{{ form.marital_status(class="js-registry-select block w-full", data_placeholder="Select...") }}{{ errors(form.marital_status) }}</div>
             <div>{{ label(form.sexual_orientation) }}{{ form.sexual_orientation(class="js-registry-select block w-full", data_placeholder="Select...", data_other_trigger="sexual_orientation_other") }}{{ errors(form.sexual_orientation) }}</div>
             <div>{{ label(form.sexual_orientation_other, "sexual_orientation_other") }}{{ form.sexual_orientation_other(class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-sentinel-600 focus:outline-none focus:ring-2 focus:ring-sentinel-600/20 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:disabled:bg-slate-900 dark:disabled:text-slate-600", data_other_field="true") }}{{ errors(form.sexual_orientation_other) }}</div>
@@ -349,6 +349,8 @@
                         <tr>
                             <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">Hospital Number</th>
                             <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">Patient Name</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">Age</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">Sex at Birth</th>
                         </tr>
                     </thead>
                     <tbody></tbody>

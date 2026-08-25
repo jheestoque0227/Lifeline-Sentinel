@@ -16,10 +16,15 @@ depends_on = None
 
 
 def upgrade():
-    with op.batch_alter_table("registries", schema=None) as batch_op:
-        batch_op.drop_column("risk_level")
+    bind = op.get_bind()
+    inspector = sa.inspect(bind)
+    registry_columns = {column["name"] for column in inspector.get_columns("registries")}
+    if "risk_level" in registry_columns:
+        with op.batch_alter_table("registries", schema=None) as batch_op:
+            batch_op.drop_column("risk_level")
 
 
 def downgrade():
-    with op.batch_alter_table("registries", schema=None) as batch_op:
-        batch_op.add_column(sa.Column("risk_level", sa.Enum("Low", "Moderate", "High"), nullable=True))
+    # risk_level belongs to ML analytics outputs and must not be restored
+    # as a persisted registry field.
+    pass

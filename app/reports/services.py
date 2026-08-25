@@ -4,7 +4,7 @@ from sqlalchemy import or_
 
 from app.models.incident_detail import RegistryIncident, RegistryIncidentMethod
 from app.models.registry import Registry
-from app.services.hospitals import get_configured_hospital_code
+from app.services.hospitals import get_user_hospital_code, hospital_display_label, hospital_filter_choices, user_has_all_hospitals
 
 
 REPORT_TITLE = "Registry Entries Report"
@@ -104,7 +104,7 @@ def filter_options(user):
     methods = RegistryIncidentMethod.query.join(RegistryIncident).join(Registry)
     methods = _apply_scope(methods, user)
     return {
-        "hospital_codes": _distinct_values(query, Registry.hospital_code),
+        "hospital_codes": hospital_filter_choices(_distinct_values(query, Registry.hospital_code)),
         "data_steward_codes": _distinct_values(query, Registry.data_steward_code),
         "regions": _distinct_values(incidents, RegistryIncident.incident_region),
         "provinces": _distinct_values(incidents, RegistryIncident.province_or_city),
@@ -131,7 +131,10 @@ def applied_filter_labels(filters):
     ]:
         value = filters.get(key)
         if value:
-            labels.append((label, value.isoformat() if hasattr(value, "isoformat") else value))
+            display_value = value.isoformat() if hasattr(value, "isoformat") else value
+            if key == "hospital_code":
+                display_value = hospital_display_label(display_value)
+            labels.append((label, display_value))
     return labels
 
 
@@ -198,12 +201,11 @@ def _scoped_registry_query(user):
 
 
 def _apply_scope(query, user):
-    if user.role == "Encoder":
-        hospital_code = get_configured_hospital_code()
-        scope = [Registry.created_by == user.id, Registry.data_steward_code == user.employee_no]
-        if hospital_code:
-            scope.append(Registry.hospital_code == hospital_code)
-        return query.filter(or_(*scope))
+    if user.role in {"Encoder", "Analyst"} and not user_has_all_hospitals(user):
+        hospital_code = get_user_hospital_code(user)
+        if not hospital_code:
+            return query.filter(False)
+        return query.filter(Registry.hospital_code == hospital_code)
     return query
 
 

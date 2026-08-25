@@ -95,7 +95,7 @@ def create_app(config_class=Config):
     @login_manager.user_loader
     def load_user(user_id):
         user = User.query.get(int(user_id))
-        if user and user.is_active_user:
+        if user and user.is_active_user and not user.deleted_at:
             return user
         return None
 

@@ -26,15 +26,23 @@
                 </label>
                 <label class="block">
                     <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">Forecast aggregation</span>
-                    <select name="forecast_frequency" class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950">
+                    <select name="forecast_frequency" class="js-registry-select block w-full" data-placeholder="Select...">
                         <option value="monthly" {% if filters.forecast_frequency == 'monthly' %}selected{% endif %}>Monthly</option>
                         <option value="weekly" {% if filters.forecast_frequency == 'weekly' %}selected{% endif %}>Weekly</option>
                     </select>
                 </label>
             </div>
             <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <label class="block">
+                    <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">Hospital code</span>
+                    <select name="hospital_code" class="js-registry-select block w-full" data-placeholder="All">
+                        <option value="">All</option>
+                        {% for code, label in filter_options.hospital_codes %}
+                        <option value="{{ code }}" {% if filters.hospital_code == code %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
                 {% set selects = [
-                    ('hospital_code', 'Hospital code', filter_options.hospital_codes),
                     ('region', 'Region', filter_options.regions),
                     ('province', 'Province', filter_options.provinces),
                     ('city', 'City/Municipality', filter_options.cities),
@@ -48,7 +56,7 @@
                 {% for name, label, choices in selects %}
                 <label class="block">
                     <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">{{ label }}</span>
-                    <select name="{{ name }}" class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950">
+                    <select name="{{ name }}" class="js-registry-select block w-full" data-placeholder="All">
                         <option value="">All</option>
                         {% for choice in choices %}
                         <option value="{{ choice }}" {% if filters[name] == choice %}selected{% endif %}>{{ choice }}</option>

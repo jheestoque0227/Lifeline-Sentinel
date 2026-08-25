@@ -9,24 +9,36 @@ from app.models.diagnosis_disposition import DiagnosisDisposition
 from app.models.incident_detail import RegistryIncident, RegistryIncidentMethod
 from app.models.psychiatric_history import PsychiatricHistory
 from app.models.registry import Registry
-from app.services.hospitals import get_configured_hospital_code
+from app.services.hospitals import get_configured_hospital_code, get_user_hospital_code, user_has_all_hospitals
 
 
-def registry_query(include_deleted=False):
+def registry_query(include_deleted=False, user=None):
     query = Registry.query
     if not include_deleted:
         query = query.filter(Registry.deleted_at.is_(None))
+    query = apply_user_hospital_scope(query, user)
     return query
 
 
-def search_registries(q=None, reporting_department=None, include_deleted=False):
-    query = registry_query(include_deleted=include_deleted)
+def search_registries(q=None, reporting_department=None, hospital_code=None, include_deleted=False, user=None):
+    query = registry_query(include_deleted=include_deleted, user=user)
     if q:
         like = f"%{q.strip()}%"
         query = query.filter(or_(Registry.registry_code.ilike(like), Registry.patient_identifier.ilike(like)))
     if reporting_department:
         query = query.filter(Registry.reporting_department == reporting_department)
+    if hospital_code:
+        query = query.filter(Registry.hospital_code == hospital_code)
     return query.order_by(Registry.date_of_presentation.desc(), Registry.created_at.desc())
+
+
+def apply_user_hospital_scope(query, user):
+    if not user or user.role == "Admin" or user_has_all_hospitals(user):
+        return query
+    hospital_code = get_user_hospital_code(user)
+    if not hospital_code:
+        return query.filter(False)
+    return query.filter(Registry.hospital_code == hospital_code)
 
 
 def generate_registry_code():
@@ -63,7 +75,7 @@ def apply_registry_form(registry, form, user, is_create=False):
     if is_create or not registry.data_steward_code:
         registry.data_steward_code = user.employee_no
     if is_create or not registry.hospital_code:
-        registry.hospital_code = get_configured_hospital_code()
+        registry.hospital_code = get_configured_hospital_code(user)
     registry.date_of_presentation = form.date_of_presentation.data
     registry.time_of_presentation = form.time_of_presentation.data
     registry.reporting_department = form.reporting_department.data
@@ -189,7 +201,6 @@ def populate_form(form, registry):
 
 def soft_delete_registry(registry, user, remarks):
     registry.deleted_at = datetime.utcnow()
-    registry.deleted_by = user.id
     registry.deleted_remarks = remarks
     registry.updated_by = user.id
 
@@ -208,10 +219,10 @@ def registry_snapshot(registry):
     }
 
 
-def registry_statistics():
-    active = Registry.query.filter(Registry.deleted_at.is_(None))
+def registry_statistics(user=None):
+    active = apply_user_hospital_scope(Registry.query.filter(Registry.deleted_at.is_(None)), user)
     total = active.count()
-    deleted = Registry.query.filter(Registry.deleted_at.is_not(None)).count()
+    deleted = apply_user_hospital_scope(Registry.query.filter(Registry.deleted_at.is_not(None)), user).count()
     by_department = dict(
         active.with_entities(Registry.reporting_department, func.count(Registry.id))
         .group_by(Registry.reporting_department)

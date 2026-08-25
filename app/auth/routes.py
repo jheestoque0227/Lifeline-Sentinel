@@ -39,9 +39,9 @@ def login():
     if request.method == "POST":
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "")
-        user = User.query.filter_by(username=username).first()
+        user = User.query.filter_by(username=username, deleted_at=None).first()
 
-        if not user or not user.is_active_user or not user.check_password(password):
+        if not user or not user.is_active_user or user.deleted_at or not user.check_password(password):
             flash("Invalid username or password.", "danger")
             return render_template("auth/login.html", username=username)
 
@@ -78,7 +78,7 @@ def mfa_verify():
         return redirect(url_for("auth.login"))
 
     user = User.query.get(challenge["user_id"])
-    if not user or not user.is_active_user:
+    if not user or not user.is_active_user or user.deleted_at:
         clear_mfa_challenge()
         flash("Unable to verify this account. Please sign in again.", "danger")
         return redirect(url_for("auth.login"))
@@ -116,7 +116,7 @@ def mfa_resend():
         return redirect(url_for("auth.login"))
 
     user = User.query.get(challenge["user_id"])
-    if not user or not user.is_active_user:
+    if not user or not user.is_active_user or user.deleted_at:
         clear_mfa_challenge()
         flash("Unable to verify this account. Please sign in again.", "danger")
         return redirect(url_for("auth.login"))
@@ -165,17 +165,31 @@ def forgot_password():
 
     if request.method == "POST":
         identity = request.form.get("identity", "").strip()
+        if not identity:
+            flash("Please enter a registered username or email address.", "danger")
+            return render_template("auth/forgot_password.html", identity=identity)
+
+        identity_lower = identity.lower()
         user = User.query.filter(
-            (User.email == identity.lower()) | (User.username == identity)
+            ((db.func.lower(User.email) == identity_lower) | (db.func.lower(User.username) == identity_lower)),
+            User.deleted_at.is_(None),
         ).first()
-        if user and user.is_active_user:
-            send_password_reset_email(user)
-            record_audit("reset_password_requested", "auth", user=user, remarks="Password reset email requested.")
-            db.session.commit()
-        flash("If the account exists and is active, a password reset link has been sent.", "info")
+
+        if not user:
+            flash("No account was found for that username or email address.", "danger")
+            return render_template("auth/forgot_password.html", identity=identity)
+
+        if not user.is_active_user:
+            flash("This account is disabled. Please contact an administrator.", "danger")
+            return render_template("auth/forgot_password.html", identity=identity)
+
+        send_password_reset_email(user)
+        record_audit("reset_password_requested", "auth", user=user, remarks="Password reset email requested.")
+        db.session.commit()
+        flash("A password reset link has been sent to the registered email address.", "info")
         return redirect(url_for("auth.login"))
 
-    return render_template("auth/forgot_password.html")
+    return render_template("auth/forgot_password.html", identity="")
 
 
 @auth_bp.route("/reset-password/<token>", methods=["GET", "POST"])

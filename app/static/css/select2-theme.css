@@ -23,6 +23,12 @@
     max-width: 100% !important;
 }
 
+.select2-field-parent > select.js-registry-select + .select2-container,
+.select2-field-parent > select.js-example-basic-multiple + .select2-container {
+    display: block;
+    margin-top: 0.25rem;
+}
+
 input::placeholder,
 textarea::placeholder {
     color: #94a3b8;

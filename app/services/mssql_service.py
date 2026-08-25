@@ -1,3 +1,5 @@
+from datetime import date, datetime
+
 import pyodbc
 from flask import current_app
 
@@ -15,6 +17,8 @@ def search_patients(keyword):
     query = """
         SELECT TOP 20
             hpercode,
+            patbdate,
+            patsex,
             CONCAT(
                 patlast,
                 CASE
@@ -52,15 +56,57 @@ def search_patients(keyword):
     results = []
 
     for row in rows:
+        birthdate = _date_value(row.patbdate)
+        sex_at_birth = _sex_at_birth_label(row.patsex)
         results.append({
             "hospital_number": row.hpercode,
-            "patient_name": row.full_name
+            "patient_name": row.full_name,
+            "birthdate": birthdate.isoformat() if birthdate else "",
+            "age": _age_from_birthdate(birthdate),
+            "sex_at_birth": sex_at_birth,
+            "patsex": row.patsex or "",
         })
 
     cursor.close()
     conn.close()
 
     return results
+
+
+def _date_value(value):
+    if not value:
+        return None
+    if isinstance(value, datetime):
+        return value.date()
+    if isinstance(value, date):
+        return value
+    for fmt in ("%Y-%m-%d", "%m/%d/%Y", "%d/%m/%Y"):
+        try:
+            return datetime.strptime(str(value), fmt).date()
+        except ValueError:
+            continue
+    return None
+
+
+def _age_from_birthdate(birthdate, as_of=None):
+    if not birthdate:
+        return None
+    as_of = as_of or date.today()
+    age = as_of.year - birthdate.year - ((as_of.month, as_of.day) < (birthdate.month, birthdate.day))
+    return max(age, 0)
+
+
+def _sex_at_birth_label(value):
+    normalized = (value or "").strip().upper()
+    if normalized in {"M", "MALE"}:
+        return "Male"
+    if normalized in {"F", "FEMALE"}:
+        return "Female"
+    if normalized in {"I", "INTERSEX"}:
+        return "Intersex"
+    if normalized in {"U", "UNK", "UNKNOWN"}:
+        return "Unknown"
+    return ""
 
 
 def search_diagnoses(keyword=""):

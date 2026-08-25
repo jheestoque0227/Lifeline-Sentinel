@@ -15,8 +15,17 @@
     <input class="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-sentinel-600 focus:ring-4 focus:ring-sentinel-100 dark:border-slate-700 dark:bg-slate-950 dark:focus:ring-sentinel-900" id="email{{ user.id if user is defined else 'new' }}" name="email" type="text" value="{{ user.email if user is defined else '' }}">
 </div>
 <div>
+    <label class="text-sm font-medium text-slate-700 dark:text-slate-200" for="hospital_id{{ user.id if user is defined else 'new' }}">Hospital</label>
+    <select class="js-registry-select block w-full" id="hospital_id{{ user.id if user is defined else 'new' }}" name="hospital_id" data-placeholder="Select hospital..." required>
+        <option value="__all__" {% if user is defined and not user.hospital_id %}selected{% endif %}>All Hospitals</option>
+        {% for hospital in hospitals %}
+        <option value="{{ hospital.id }}" {% if user is defined and user.hospital_id == hospital.id %}selected{% endif %}>{{ hospital.hospital_code }} - {{ hospital.hospital_name }}</option>
+        {% endfor %}
+    </select>
+</div>
+<div>
     <label class="text-sm font-medium text-slate-700 dark:text-slate-200" for="role{{ user.id if user is defined else 'new' }}">Role</label>
-    <select class="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-sentinel-600 focus:ring-4 focus:ring-sentinel-100 dark:border-slate-700 dark:bg-slate-950 dark:focus:ring-sentinel-900" id="role{{ user.id if user is defined else 'new' }}" name="role" required>
+    <select class="js-registry-select block w-full" id="role{{ user.id if user is defined else 'new' }}" name="role" data-placeholder="Select role..." required>
         {% for role in roles %}
         <option value="{{ role }}" {% if user is defined and user.role == role %}selected{% endif %}>{{ role }}</option>
         {% endfor %}

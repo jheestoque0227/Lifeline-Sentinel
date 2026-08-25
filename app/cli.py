@@ -35,7 +35,7 @@ def seed_registry_command(count):
         raise click.ClickException("Count must be at least 1.")
 
     actor = (
-        User.query.filter(User.role.in_(["Admin", "Encoder"]), User.is_active_user.is_(True))
+        User.query.filter(User.role.in_(["Admin", "Encoder"]), User.is_active_user.is_(True), User.deleted_at.is_(None))
         .order_by(User.id.asc())
         .first()
     )
@@ -105,7 +105,6 @@ def _apply_dummy_registry(registry, index, actor, hospital_code, rng, locations)
     registry.religion = rng.choice(options.RELIGIONS[:-1])
     registry.religion_other = None
     registry.deleted_at = None
-    registry.deleted_by = None
     registry.deleted_remarks = None
     registry.updated_at = datetime.utcnow()
 

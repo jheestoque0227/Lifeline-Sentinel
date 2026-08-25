@@ -7,7 +7,7 @@ from sqlalchemy.orm import joinedload
 from app.models.diagnosis_disposition import DiagnosisDisposition
 from app.models.incident_detail import RegistryIncident, RegistryIncidentMethod
 from app.models.registry import Registry
-from app.services.hospitals import get_configured_hospital_code
+from app.services.hospitals import get_user_hospital_code, hospital_filter_choices, user_has_all_hospitals
 
 
 AGE_GROUPS = [
@@ -125,7 +125,7 @@ def filter_options(user):
     method_query = _apply_scope(RegistryIncidentMethod.query.join(RegistryIncident).join(Registry).filter(Registry.deleted_at.is_(None)), user)
     disposition_query = _apply_scope(DiagnosisDisposition.query.join(Registry).filter(Registry.deleted_at.is_(None)), user)
     return {
-        "hospital_codes": _distinct_values(registry_query, Registry.hospital_code),
+        "hospital_codes": hospital_filter_choices(_distinct_values(registry_query, Registry.hospital_code)),
         "regions": _distinct_values(incident_query, RegistryIncident.incident_region),
         "provinces": _distinct_values(incident_query, RegistryIncident.province_or_city),
         "cities": _distinct_values(incident_query, RegistryIncident.municipality),
@@ -143,12 +143,11 @@ def applied_filter_payload(filters):
 
 
 def _apply_scope(query, user):
-    if user.role == "Encoder":
-        hospital_code = get_configured_hospital_code()
-        scope = [Registry.created_by == user.id, Registry.data_steward_code == user.employee_no]
-        if hospital_code:
-            scope.append(Registry.hospital_code == hospital_code)
-        return query.filter(or_(*scope))
+    if user.role in {"Encoder", "Analyst"} and not user_has_all_hospitals(user):
+        hospital_code = get_user_hospital_code(user)
+        if not hospital_code:
+            return query.filter(False)
+        return query.filter(Registry.hospital_code == hospital_code)
     return query
 
 

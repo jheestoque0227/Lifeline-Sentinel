@@ -11,7 +11,6 @@ IDENTIFIER_COLUMNS = {
     "data_steward_code",
     "created_by",
     "updated_by",
-    "deleted_by",
     "remarks",
     "incident_remarks",
     "notes",
@@ -250,4 +249,3 @@ def _rate(numerator, denominator):
     if not denominator:
         return 0
     return int(round(float(numerator) / float(denominator) * 100))
-

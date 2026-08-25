@@ -1,0 +1,8 @@
+<div>
+    <label class="text-sm font-medium text-slate-700 dark:text-slate-200" for="hospital_code{{ hospital.id if hospital is defined else 'new' }}">Hospital code</label>
+    <input class="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm uppercase outline-none transition focus:border-sentinel-600 focus:ring-4 focus:ring-sentinel-100 dark:border-slate-700 dark:bg-slate-950 dark:focus:ring-sentinel-900" id="hospital_code{{ hospital.id if hospital is defined else 'new' }}" name="hospital_code" type="text" value="{{ hospital.hospital_code if hospital is defined else '' }}" required>
+</div>
+<div>
+    <label class="text-sm font-medium text-slate-700 dark:text-slate-200" for="hospital_name{{ hospital.id if hospital is defined else 'new' }}">Hospital name</label>
+    <input class="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-sentinel-600 focus:ring-4 focus:ring-sentinel-100 dark:border-slate-700 dark:bg-slate-950 dark:focus:ring-sentinel-900" id="hospital_name{{ hospital.id if hospital is defined else 'new' }}" name="hospital_name" type="text" value="{{ hospital.hospital_name if hospital is defined else '' }}" required>
+</div>

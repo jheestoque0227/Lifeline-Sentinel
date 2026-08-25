@@ -10,7 +10,7 @@ def role_required(*roles):
                 return redirect(url_for("auth.login", next=request.full_path))
             if current_user.role not in roles:
                 abort(403)
-            if not current_user.is_active_user:
+            if not current_user.is_active_user or current_user.deleted_at:
                 abort(403)
             return function(*args, **kwargs)
         return wrapper

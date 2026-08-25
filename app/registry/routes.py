@@ -9,6 +9,7 @@ from app.models.registry import Registry
 from app.registry.forms import DeleteRegistryForm, RegistryForm, RegistrySearchForm
 from app.registry import options
 from app.registry.services import (
+    apply_user_hospital_scope,
     create_registry,
     populate_form,
     incident_payloads,
@@ -20,7 +21,7 @@ from app.registry.services import (
     update_registry,
 )
 from app.services.audit import record_audit
-from app.services.hospitals import get_configured_hospital_code
+from app.services.hospitals import get_configured_hospital_code, hospital_filter_choices
 from app.services.locations import get_cities_municipalities, get_provinces, get_regions
 
 registry_bp = Blueprint("registry", __name__, url_prefix="/registry")
@@ -33,11 +34,32 @@ def index():
     registries = search_registries(
         q=request.args.get("q"),
         reporting_department=request.args.get("reporting_department"),
-        include_deleted=request.args.get("include_deleted") == "1" and current_user.role == "Admin",
+        hospital_code=request.args.get("hospital_code"),
+        include_deleted=False,
+        user=current_user,
     ).all()
-    return render_template("registry/index.html", registries=registries)
+    hospital_codes = [
+        value for (value,) in apply_user_hospital_scope(Registry.query, current_user)
+        .with_entities(Registry.hospital_code)
+        .filter(Registry.hospital_code.is_not(None))
+        .distinct()
+        .order_by(Registry.hospital_code)
+        .all()
+        if value
+    ]
+    hospital_options = hospital_filter_choices(hospital_codes)
+    hospital_labels = dict(hospital_options)
+    return render_template(
+        "registry/index.html",
+        registries=registries,
+        hospital_options=hospital_options,
+        hospital_labels=hospital_labels,
+        filters=request.args,
+    )
 
 @registry_bp.route("/api/patient-search")
+@login_required
+@role_required("Admin", "Encoder")
 def patient_search():
     keyword = request.args.get("q", "").strip()
 
@@ -94,7 +116,7 @@ def search():
                 reporting_department=form.reporting_department.data,
             )
         )
-    registries = search_registries(q=request.args.get("q")).limit(25).all()
+    registries = search_registries(q=request.args.get("q"), user=current_user).limit(25).all()
     return render_template("registry/search.html", form=form, registries=registries)
 
 
@@ -104,7 +126,7 @@ def search():
 def create():
     form = RegistryForm()
     form.data_steward_code.data = current_user.employee_no
-    form.hospital_code.data = get_configured_hospital_code()
+    form.hospital_code.data = get_configured_hospital_code(current_user)
     if form.validate_on_submit() and validate_incident_payloads():
         registry = create_registry(form, current_user)
         record_audit(
@@ -141,7 +163,7 @@ def view(registry_id):
 @login_required
 @role_required("Admin", "Encoder")
 def edit(registry_id):
-    registry = registry_query().filter(Registry.id == registry_id).first_or_404()
+    registry = registry_query(user=current_user).filter(Registry.id == registry_id).first_or_404()
     form = RegistryForm()
     if form.validate_on_submit() and validate_incident_payloads():
         old_values = registry_snapshot(registry)
@@ -168,7 +190,7 @@ def edit(registry_id):
 @login_required
 @role_required("Admin", "Encoder")
 def delete(registry_id):
-    registry = registry_query().filter(Registry.id == registry_id).first_or_404()
+    registry = registry_query(user=current_user).filter(Registry.id == registry_id).first_or_404()
     form = DeleteRegistryForm()
     if not form.validate_on_submit():
         for errors in form.errors.values():
@@ -209,12 +231,12 @@ def print_view(registry_id):
 @login_required
 @role_required("Admin", "Encoder", "Analyst")
 def statistics():
-    stats = registry_statistics()
+    stats = registry_statistics(current_user)
     return render_template("registry/statistics.html", stats=stats)
 
 
 def _get_registry_for_view(registry_id):
-    query = Registry.query if current_user.role == "Admin" else registry_query()
+    query = Registry.query if current_user.role == "Admin" else registry_query(user=current_user)
     return query.filter(Registry.id == registry_id).first_or_404()
 
 

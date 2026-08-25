@@ -33,7 +33,6 @@ class Registry(db.Model):
 
     created_by = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
     updated_by = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
-    deleted_by = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
     deleted_remarks = db.Column(db.String(255), nullable=True)
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)

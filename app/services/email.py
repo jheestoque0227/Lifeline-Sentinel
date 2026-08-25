@@ -34,7 +34,7 @@ def verify_reset_token(token, max_age=3600):
         return None
 
     user = User.query.get(payload.get("user_id"))
-    if not user or not user.is_active_user:
+    if not user or not user.is_active_user or user.deleted_at:
         return None
     if payload.get("password_hash") != user.password_hash:
         return None
